@@ -1,0 +1,70 @@
+spring:
+  # ===============================
+  # DATABASE — LOCAL
+  # ===============================
+  datasource:
+    url: jdbc:postgresql://localhost:5432/banco_cuscatlan
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+  # ===============================
+  # JPA / HIBERNATE
+  # ===============================
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  # ===============================
+  # CACHE
+  # ===============================
+  cache:
+    type: simple
+    cache-names: default
+
+# ===============================
+# LOGGING (DEV — más verboso)
+# ===============================
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# ===============================
+# APP CUSTOM PROPERTIES
+# ===============================
+app:
+  jwt:
+    secret: dev-secret-key-banco-cuscatlan-2026-must-be-at-least-256-bits-long
+    expiration: 86400000   # 24 horas en ms
+  cache:
+    cache-name: default
+    ttl: 3600              # segundos
+
+# ===============================
+# RESILIENCE4J
+# ===============================
+resilience4j:
+  circuitbreaker:
+    instances:
+      default:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+  retry:
+    instances:
+      default:
+        maxAttempts: 3
+        waitDuration: 500ms
+  timelimiter:
+    instances:
+      default:
+        timeoutDuration: 5s

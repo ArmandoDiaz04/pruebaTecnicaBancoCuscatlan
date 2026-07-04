@@ -1,0 +1,71 @@
+spring:
+  # ===============================
+  # DATABASE — PRODUCCIÓN (env vars)
+  # ===============================
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USER}
+    password: ${DB_PASS}
+    driver-class-name: org.postgresql.Driver
+
+  # ===============================
+  # JPA / HIBERNATE
+  # ===============================
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+
+  # ===============================
+  # CACHE
+  # ===============================
+  cache:
+    type: simple
+    cache-names: default
+
+# ===============================
+# LOGGING (PROD — solo WARN+)
+# ===============================
+logging:
+  level:
+    root: WARN
+    com.pruebaTecnica.BancoCuscatlan: INFO
+    org.hibernate.SQL: WARN
+
+# ===============================
+# APP CUSTOM PROPERTIES
+# ===============================
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: ${JWT_EXPIRATION:86400000}
+  cache:
+    cache-name: default
+    ttl: ${CACHE_TTL:3600}
+
+# ===============================
+# RESILIENCE4J
+# ===============================
+resilience4j:
+  circuitbreaker:
+    instances:
+      default:
+        slidingWindowSize: 20
+        failureRateThreshold: 40
+        waitDurationInOpenState: 30s
+        permittedNumberOfCallsInHalfOpenState: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+  retry:
+    instances:
+      default:
+        maxAttempts: 2
+        waitDuration: 1000ms
+  timelimiter:
+    instances:
+      default:
+        timeoutDuration: 3s

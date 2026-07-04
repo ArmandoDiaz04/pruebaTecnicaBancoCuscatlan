@@ -18,10 +18,11 @@ API REST para el sistema bancario de Banco Cuscatlán construida con Spring Boot
 - **Spring Data JPA** - Persistencia de datos
 - **Spring Security** - Seguridad
 - **PostgreSQL** - Base de datos
+- **JJWT 0.12.6** - Generación y validación de JWT
 - **MapStruct 1.6.3** - Mapeo de DTOs
 - **Lombok** - Reducción de boilerplate
 - **Springdoc OpenAPI 2.8.16** - Documentación API
-- **Resilience4j** - Circuit Breaker
+- **Resilience4j** - Circuit Breaker y Retry
 - **TestContainers** - Testing de integración
 - **Maven** - Gestión de dependencias
 
@@ -51,6 +52,7 @@ src/main/java/com/pruebaTecnica/BancoCuscatlan/
 │   ├── ResourceNotFoundException.java
 │   └── BadRequestException.java
 ├── config/                         # Configuraciones
+│   ├── AppProperties.java           # @ConfigurationProperties centralizadas
 │   ├── SecurityConfig.java
 │   ├── OpenApiConfig.java
 │   └── CacheConfig.java
@@ -62,24 +64,82 @@ src/main/java/com/pruebaTecnica/BancoCuscatlan/
 
 ## ⚙️ Configuración
 
+### Perfiles disponibles
+
+| Perfil | Archivo | Uso |
+|--------|---------|-----|
+| `dev` | `application-dev.yml` | Desarrollo local (activo por defecto) |
+| `prod` | `application-prod.yml` | Producción (usa variables de entorno) |
+
 ### Base de Datos
 
-Crear base de datos PostgreSQL:
+Crear base de datos PostgreSQL local (perfil `dev`):
 
 ```sql
 CREATE DATABASE banco_cuscatlan;
 ```
 
-### application.properties
-
-La configuración por defecto espera:
+La configuración `dev` espera:
 - **Host:** localhost
 - **Puerto:** 5432
 - **Database:** banco_cuscatlan
 - **Usuario:** postgres
 - **Password:** postgres
 
-Puedes modificar estos valores en `src/main/resources/application.properties`
+Puedes modificar estos valores en `src/main/resources/application-dev.yml`.
+
+### Variables de entorno (perfil `prod`)
+
+| Variable | Descripción |
+|----------|-------------|
+| `DB_URL` | URL JDBC de PostgreSQL |
+| `DB_USER` | Usuario de la base de datos |
+| `DB_PASS` | Contraseña de la base de datos |
+| `JWT_SECRET` | Clave secreta para firmar JWT (mín. 256 bits) |
+| `JWT_EXPIRATION` | Expiración del token en ms (default: 86400000) |
+| `CACHE_TTL` | TTL del caché en segundos (default: 3600) |
+
+---
+
+## 🔧 `@ConfigurationProperties` vs `@Value`
+
+Este proyecto utiliza `@ConfigurationProperties` en lugar de `@Value` dispersos por el código. A continuación se explica el por qué:
+
+### ❌ Problema con `@Value`
+
+```java
+// Disperso en múltiples clases — difícil de mantener
+@Value("${app.jwt.secret}")  private String secret;
+@Value("${app.jwt.expiration}") private long expiration;
+@Value("${app.cache.cache-name}") private String cacheName;
+```
+
+- Las claves de propiedades están **dispersas** por todo el código.
+- No hay **autocompletado** ni validación en tiempo de compilación.
+- Es **difícil de testear** (requiere contexto de Spring o mocks).
+- Un typo en la clave solo falla **en tiempo de ejecución**.
+
+### ✅ Ventajas de `@ConfigurationProperties`
+
+```java
+@ConfigurationProperties(prefix = "app")
+public class AppProperties {
+    private final Jwt jwt = new Jwt();
+    private final Cache cache = new Cache();
+    // ...
+}
+```
+
+| Aspecto | `@Value` | `@ConfigurationProperties` |
+|---------|----------|----------------------------|
+| Organización | Disperso | Centralizado en una clase |
+| Tipado | String/primitivos | Objetos anidados tipados |
+| Validación | No | Sí (`@NotBlank`, `@Positive`) |
+| Testabilidad | Requiere contexto Spring | Instanciable directamente |
+| Autocompletado IDE | Limitado | Completo con `spring-boot-configuration-processor` |
+| Refactoring | Riesgoso | Seguro |
+
+La clase `AppProperties` agrupa las secciones `app.jwt.*` y `app.cache.*`, y es registrada en el arranque mediante `@EnableConfigurationProperties(AppProperties.class)`.
 
 ## 🏃 Ejecución
 
@@ -89,8 +149,12 @@ Puedes modificar estos valores en `src/main/resources/application.properties`
 # Compilar el proyecto
 mvn clean compile
 
-# Ejecutar la aplicación
+# Ejecutar con perfil dev (activo por defecto)
 mvn spring-boot:run
+
+# Ejecutar con perfil específico
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+mvn spring-boot:run -Dspring-boot.run.profiles=prod
 ```
 
 ### Opción 2: JAR

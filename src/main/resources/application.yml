@@ -1,0 +1,53 @@
+spring:
+  application:
+    name: BancoCuscatlan
+  profiles:
+    active: dev
+
+# ===============================
+# ACTUATOR
+# ===============================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+# ===============================
+# SPRINGDOC / SWAGGER
+# ===============================
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+    operationsSorter: method
+  show-actuator: true
+
+# ===============================
+# SERVER
+# ===============================
+server:
+  port: 8080
+  error:
+    include-message: always
+    include-binding-errors: always
+
+# ===============================
+# LOGGING
+# ===============================
+logging:
+  level:
+    root: INFO
+    com.pruebaTecnica.BancoCuscatlan: DEBUG
+    org.springframework.web: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
