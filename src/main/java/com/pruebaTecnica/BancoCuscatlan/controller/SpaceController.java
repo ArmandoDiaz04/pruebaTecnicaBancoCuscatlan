@@ -61,9 +61,15 @@ public class SpaceController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Eliminar espacio", description = "Elimina un espacio por su id")
+    @Operation(summary = "Desactivar espacio", description = "Desactiva un espacio por su id (soft delete)")
     public ResponseEntity<Void> deleteSpace(@PathVariable Long id) {
         spaceService.deleteSpace(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/inactive")
+    @Operation(summary = "Listar espacios inactivos", description = "ADMIN: ver espacios desactivados")
+    public ResponseEntity<List<SpaceResponse>> getInactiveSpaces() {
+        return ResponseEntity.ok(spaceService.getInactiveSpaces());
     }
 }

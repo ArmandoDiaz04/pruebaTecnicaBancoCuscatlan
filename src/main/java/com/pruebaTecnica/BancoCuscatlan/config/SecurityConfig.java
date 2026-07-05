@@ -62,9 +62,11 @@ public class SecurityConfig {
                 ).permitAll()
                 // Reglas por rol
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.POST, "/api/spaces").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/api/spaces/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/api/spaces/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/spaces/inactive").hasRole("ADMIN")
                 .requestMatchers("/api/reports/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.GET, "/api/reservations").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PATCH, "/api/reservations/*/status").hasRole("ADMIN")

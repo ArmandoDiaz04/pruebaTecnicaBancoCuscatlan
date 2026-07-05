@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class CreateReservationRequest {
 
-    @NotNull(message = "El usuario es obligatorio")
     private Long userId;
 
     @NotNull(message = "El espacio es obligatorio")
@@ -28,4 +27,6 @@ public class CreateReservationRequest {
     private LocalDateTime endDateTime;
 
     private String paymentReference;
+
+    private String paymentMethodId;
 }

@@ -10,6 +10,7 @@ import com.pruebaTecnica.BancoCuscatlan.dto.ReservationResponse;
 import com.pruebaTecnica.BancoCuscatlan.exception.BadRequestException;
 import com.pruebaTecnica.BancoCuscatlan.exception.ConflictException;
 import com.pruebaTecnica.BancoCuscatlan.exception.ForbiddenException;
+import com.pruebaTecnica.BancoCuscatlan.exception.OverlappingReservationException;
 import com.pruebaTecnica.BancoCuscatlan.exception.ResourceNotFoundException;
 import com.pruebaTecnica.BancoCuscatlan.mapper.ReservationMapper;
 import com.pruebaTecnica.BancoCuscatlan.repository.ReservationRepository;
@@ -53,12 +54,26 @@ public class ReservationService {
     @Transactional
     public ReservationResponse createReservation(CreateReservationRequest request) {
         AuthenticatedUserPrincipal principal = SecurityUtils.currentUser();
-        if (principal.role() == Role.USER && !principal.id().equals(request.getUserId())) {
+
+        Long targetUserId = request.getUserId();
+        if (principal.role() == Role.USER) {
+            if (targetUserId == null) {
+                targetUserId = principal.id();
+            }
+            if (!principal.id().equals(targetUserId)) {
+                throw new ForbiddenException("No puede crear reservas para otro usuario");
+            }
+        } else if (targetUserId == null) {
+            targetUserId = principal.id();
+        }
+
+        if (principal.role() == Role.USER && !principal.id().equals(targetUserId)) {
             throw new ForbiddenException("No puede crear reservas para otro usuario");
         }
 
-        User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + request.getUserId()));
+        final Long resolvedUserId = targetUserId;
+        User user = userRepository.findById(resolvedUserId)
+            .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + resolvedUserId));
 
         Space space = spaceRepository.findById(request.getSpaceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Espacio no encontrado con id: " + request.getSpaceId()));
@@ -79,7 +94,7 @@ public class ReservationService {
         );
 
         if (overlaps) {
-            throw new ConflictException("El espacio ya tiene una reserva en el rango de tiempo solicitado");
+            throw new OverlappingReservationException("El espacio ya tiene una reserva en el rango de tiempo solicitado");
         }
 
         Reservation reservation = Reservation.builder()
@@ -88,7 +103,7 @@ public class ReservationService {
                 .startDateTime(request.getStartDateTime())
                 .endDateTime(request.getEndDateTime())
                 .status(ReservationStatus.PENDING_PAYMENT)
-                .paymentReference(request.getPaymentReference())
+                .paymentReference(resolvePaymentReference(request))
                 .totalAmount(calculateTotalAmount(space.getHourlyRate(), request.getStartDateTime(), request.getEndDateTime()))
                 .build();
 
@@ -126,6 +141,11 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
+    public List<ReservationResponse> getMyReservations() {
+        return getReservationsByUser(SecurityUtils.currentUser().id());
+    }
+
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getAllReservations() {
         return reservationRepository.findAll().stream()
                 .map(reservationMapper::toResponse)
@@ -156,9 +176,34 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada con id: " + reservationId));
 
+        validateStatusTransition(reservation.getStatus(), status);
+
         reservation.setStatus(status);
         Reservation updated = reservationRepository.save(reservation);
         return reservationMapper.toResponse(updated);
+    }
+
+    private String resolvePaymentReference(CreateReservationRequest request) {
+        if (request.getPaymentMethodId() != null && !request.getPaymentMethodId().isBlank()) {
+            return request.getPaymentMethodId();
+        }
+        return request.getPaymentReference();
+    }
+
+    private void validateStatusTransition(ReservationStatus currentStatus, ReservationStatus newStatus) {
+        if (currentStatus == newStatus) {
+            return;
+        }
+
+        boolean valid = switch (currentStatus) {
+            case PENDING_PAYMENT -> newStatus == ReservationStatus.CONFIRMED || newStatus == ReservationStatus.CANCELLED;
+            case CONFIRMED -> newStatus == ReservationStatus.COMPLETED || newStatus == ReservationStatus.CANCELLED;
+            case CANCELLED, COMPLETED -> false;
+        };
+
+        if (!valid) {
+            throw new BadRequestException("Transición inválida de estado: " + currentStatus + " -> " + newStatus);
+        }
     }
 
     private BigDecimal calculateTotalAmount(BigDecimal hourlyRate, java.time.LocalDateTime start, java.time.LocalDateTime end) {

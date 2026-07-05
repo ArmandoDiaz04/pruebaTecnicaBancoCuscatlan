@@ -49,6 +49,12 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.getAllReservations());
     }
 
+    @GetMapping("/my")
+    @Operation(summary = "Listar mis reservas")
+    public ResponseEntity<List<ReservationResponse>> getMyReservations() {
+        return ResponseEntity.ok(reservationService.getMyReservations());
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Obtener reserva por id")
     public ResponseEntity<ReservationResponse> getReservationById(@PathVariable Long id) {

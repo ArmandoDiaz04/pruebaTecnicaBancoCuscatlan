@@ -34,14 +34,14 @@ public class SpaceService {
 
     @Transactional(readOnly = true)
     public SpaceResponse getSpaceById(Long id) {
-        Space space = spaceRepository.findById(id)
+        Space space = spaceRepository.findByIdAndActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Espacio no encontrado con id: " + id));
         return spaceMapper.toResponse(space);
     }
 
     @Transactional(readOnly = true)
     public List<SpaceResponse> getAllSpaces() {
-        return spaceRepository.findAll().stream()
+        return spaceRepository.findByActiveTrue().stream()
                 .map(spaceMapper::toResponse)
                 .toList();
     }
@@ -64,9 +64,16 @@ public class SpaceService {
 
     @Transactional
     public void deleteSpace(Long id) {
-        if (!spaceRepository.existsById(id)) {
-            throw new ResourceNotFoundException("Espacio no encontrado con id: " + id);
-        }
-        spaceRepository.deleteById(id);
+        Space space = spaceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Espacio no encontrado con id: " + id));
+        space.setActive(false);
+        spaceRepository.save(space);
+    }
+
+    @Transactional(readOnly = true)
+    public List<SpaceResponse> getInactiveSpaces() {
+        return spaceRepository.findByActiveFalse().stream()
+                .map(spaceMapper::toResponse)
+                .toList();
     }
 }
