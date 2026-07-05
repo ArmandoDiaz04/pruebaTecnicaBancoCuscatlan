@@ -206,6 +206,81 @@ Acceder a la documentación interactiva en:
 - **Swagger UI:** http://localhost:8080/swagger-ui.html
 - **OpenAPI JSON:** http://localhost:8080/api-docs
 
+## 💳 Pago Simulado y Resiliencia
+
+### Validación de pago externa simulada
+
+Se implementó un proveedor de pago mock para simular una integración externa:
+
+```http
+POST /mock/payments/validate
+```
+
+La creación de reservas invoca este servicio. Reglas:
+
+- Si el pago es aprobado, la reserva pasa a `CONFIRMED`.
+- Si el pago falla o el servicio externo no responde, la reserva se crea en `PENDING_PAYMENT`.
+
+### Circuit Breaker y fallback
+
+La llamada al pago está protegida con Resilience4j (`paymentValidation`) para evitar que una caída externa tumbe la API.
+
+Configuración clave:
+
+- failure rate threshold
+- sliding window size
+- wait duration in open state
+- timeout (TimeLimiter)
+
+Fallback aplicado:
+
+- no rompe la petición HTTP de reserva
+- deja la reserva en `PENDING_PAYMENT`
+
+El estado del circuito se expone por Actuator (`/actuator/circuitbreakers`, `/actuator/circuitbreakerevents`).
+
+## 📣 Observer y Notificación Asíncrona
+
+Se aplicó explícitamente el patrón GoF **Observer** con eventos de dominio:
+
+- `ReservationConfirmedEvent`
+- `ReservationStatusChangedEvent`
+- `SpaceChangedEvent`
+
+Flujo:
+
+1. El servicio de reservas confirma o cambia estado.
+2. Publica un evento con `ApplicationEventPublisher`.
+3. Listeners reaccionan de forma desacoplada:
+  - notificación simulada por log (asíncrona con `@Async`)
+  - invalidación de cache de reportes
+
+Este enfoque evita acoplar lógica transversal (correo, cache, auditoría) al `ReservationService` con cadenas de `if/else`.
+
+## 📊 Reporte de Ocupación y Cache
+
+Endpoint:
+
+```http
+GET /api/reports/occupancy?from=2026-07-01&to=2026-07-31
+```
+
+Disponible solo para `ADMIN`.
+
+El reporte usa `@Cacheable` para evitar recálculos costosos. Se calcula por espacio:
+
+`horas confirmadas en rango / horas disponibles del rango * 100`
+
+Modelo actual de horas disponibles: **24h por día** en el rango.
+
+Invalidación (`@CacheEvict`) cuando cambia información crítica:
+
+- reserva confirmada
+- reserva cancelada
+- espacio creado/actualizado/desactivado
+
+Motivo de cache: reducir latencia y carga de consultas agregadas sobre reservas históricas, manteniendo consistencia mediante invalidación por evento.
+
 ## 🧪 Testing
 
 ### Ejecutar Tests

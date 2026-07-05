@@ -5,6 +5,7 @@ import com.pruebaTecnica.BancoCuscatlan.domain.enums.Role;
 import com.pruebaTecnica.BancoCuscatlan.dto.CreateUserRequest;
 import com.pruebaTecnica.BancoCuscatlan.dto.UserResponse;
 import com.pruebaTecnica.BancoCuscatlan.exception.BadRequestException;
+import com.pruebaTecnica.BancoCuscatlan.exception.EmailAlreadyExistsException;
 import com.pruebaTecnica.BancoCuscatlan.exception.ResourceNotFoundException;
 import com.pruebaTecnica.BancoCuscatlan.mapper.UserMapper;
 import com.pruebaTecnica.BancoCuscatlan.repository.UserRepository;
@@ -30,7 +31,7 @@ public class UserService {
     @Transactional
     public UserResponse createUser(CreateUserRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new BadRequestException("Ya existe un usuario con ese email");
+            throw new EmailAlreadyExistsException("Ya existe un usuario con ese email");
         }
 
         User user = userMapper.toEntity(request);

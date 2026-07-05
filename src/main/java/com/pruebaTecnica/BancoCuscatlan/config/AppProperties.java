@@ -24,6 +24,7 @@ public class AppProperties {
 
     private final Jwt jwt = new Jwt();
     private final Cache cache = new Cache();
+    private final Payment payment = new Payment();
 
     @Getter
     @Setter
@@ -49,5 +50,16 @@ public class AppProperties {
         /** TTL en segundos para las entradas de caché. */
         @Positive
         private long ttl = 3600L;
+    }
+
+    @Getter
+    @Setter
+    public static class Payment {
+
+        @NotBlank
+        private String baseUrl = "http://localhost:8080";
+
+        @NotBlank
+        private String validatePath = "/mock/payments/validate";
     }
 }

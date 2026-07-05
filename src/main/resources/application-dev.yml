@@ -46,6 +46,9 @@ app:
   cache:
     cache-name: default
     ttl: 3600              # segundos
+  payment:
+    base-url: http://localhost:8080
+    validate-path: /mock/payments/validate
 
 # ===============================
 # RESILIENCE4J
@@ -53,6 +56,13 @@ app:
 resilience4j:
   circuitbreaker:
     instances:
+      paymentValidation:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        registerHealthIndicator: true
       default:
         slidingWindowSize: 10
         failureRateThreshold: 50
@@ -66,5 +76,7 @@ resilience4j:
         waitDuration: 500ms
   timelimiter:
     instances:
+      paymentValidation:
+        timeoutDuration: 2s
       default:
         timeoutDuration: 5s

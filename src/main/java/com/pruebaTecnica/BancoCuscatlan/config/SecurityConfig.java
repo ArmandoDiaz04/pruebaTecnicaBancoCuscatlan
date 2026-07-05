@@ -53,6 +53,7 @@ public class SecurityConfig {
                     "/",
                     "/api/auth/register",
                     "/api/auth/login",
+                    "/mock/payments/**",
                     "/api/health",
                     "/actuator/**",
                     "/swagger-ui/**",
@@ -71,6 +72,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/reservations").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PATCH, "/api/reservations/*/status").hasRole("ADMIN")
                 .requestMatchers("/api/reservations/**").authenticated()
+                .requestMatchers(HttpMethod.GET, "/api/spaces").authenticated()
                 .requestMatchers(HttpMethod.GET, "/api/spaces/**").authenticated()
                 .anyRequest().authenticated()
             )

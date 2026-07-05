@@ -6,18 +6,22 @@ import com.pruebaTecnica.BancoCuscatlan.domain.entity.User;
 import com.pruebaTecnica.BancoCuscatlan.domain.enums.Role;
 import com.pruebaTecnica.BancoCuscatlan.domain.enums.ReservationStatus;
 import com.pruebaTecnica.BancoCuscatlan.dto.CreateReservationRequest;
+import com.pruebaTecnica.BancoCuscatlan.dto.PaymentValidationRequest;
+import com.pruebaTecnica.BancoCuscatlan.dto.PaymentValidationResponse;
 import com.pruebaTecnica.BancoCuscatlan.dto.ReservationResponse;
 import com.pruebaTecnica.BancoCuscatlan.exception.BadRequestException;
-import com.pruebaTecnica.BancoCuscatlan.exception.ConflictException;
 import com.pruebaTecnica.BancoCuscatlan.exception.ForbiddenException;
 import com.pruebaTecnica.BancoCuscatlan.exception.OverlappingReservationException;
 import com.pruebaTecnica.BancoCuscatlan.exception.ResourceNotFoundException;
+import com.pruebaTecnica.BancoCuscatlan.event.ReservationConfirmedEvent;
+import com.pruebaTecnica.BancoCuscatlan.event.ReservationStatusChangedEvent;
 import com.pruebaTecnica.BancoCuscatlan.mapper.ReservationMapper;
 import com.pruebaTecnica.BancoCuscatlan.repository.ReservationRepository;
 import com.pruebaTecnica.BancoCuscatlan.repository.SpaceRepository;
 import com.pruebaTecnica.BancoCuscatlan.repository.UserRepository;
 import com.pruebaTecnica.BancoCuscatlan.security.AuthenticatedUserPrincipal;
 import com.pruebaTecnica.BancoCuscatlan.security.SecurityUtils;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,17 +42,23 @@ public class ReservationService {
     private final UserRepository userRepository;
     private final SpaceRepository spaceRepository;
     private final ReservationMapper reservationMapper;
+    private final PaymentValidationService paymentValidationService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             UserRepository userRepository,
             SpaceRepository spaceRepository,
-            ReservationMapper reservationMapper
+            ReservationMapper reservationMapper,
+            PaymentValidationService paymentValidationService,
+            ApplicationEventPublisher eventPublisher
     ) {
         this.reservationRepository = reservationRepository;
         this.userRepository = userRepository;
         this.spaceRepository = spaceRepository;
         this.reservationMapper = reservationMapper;
+        this.paymentValidationService = paymentValidationService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional
@@ -97,17 +107,34 @@ public class ReservationService {
             throw new OverlappingReservationException("El espacio ya tiene una reserva en el rango de tiempo solicitado");
         }
 
+        BigDecimal totalAmount = calculateTotalAmount(space.getHourlyRate(), request.getStartDateTime(), request.getEndDateTime());
+        PaymentValidationResponse paymentResult = paymentValidationService.validatePayment(
+            PaymentValidationRequest.builder()
+                .paymentMethodId(resolvePaymentMethodId(request))
+                .amount(totalAmount)
+                .reservationId(null)
+                .build()
+        ).join();
+
+        ReservationStatus status = paymentResult.isApproved()
+            ? ReservationStatus.CONFIRMED
+            : ReservationStatus.PENDING_PAYMENT;
+
         Reservation reservation = Reservation.builder()
                 .user(user)
                 .space(space)
                 .startDateTime(request.getStartDateTime())
                 .endDateTime(request.getEndDateTime())
-                .status(ReservationStatus.PENDING_PAYMENT)
-                .paymentReference(resolvePaymentReference(request))
-                .totalAmount(calculateTotalAmount(space.getHourlyRate(), request.getStartDateTime(), request.getEndDateTime()))
+            .status(status)
+            .paymentReference(resolvePaymentReference(request, paymentResult))
+            .totalAmount(totalAmount)
                 .build();
 
         Reservation created = reservationRepository.save(reservation);
+        if (created.getStatus() == ReservationStatus.CONFIRMED) {
+            publishConfirmedEvent(created);
+        }
+        eventPublisher.publishEvent(new ReservationStatusChangedEvent(created.getId(), created.getStatus()));
         return reservationMapper.toResponse(created);
     }
 
@@ -128,7 +155,7 @@ public class ReservationService {
     public List<ReservationResponse> getReservationsByUser(Long userId) {
         AuthenticatedUserPrincipal principal = SecurityUtils.currentUser();
         if (principal.role() == Role.USER && !principal.id().equals(userId)) {
-            throw new ForbiddenException("No puede consultar reservas de otro usuario");
+            throw new com.pruebaTecnica.BancoCuscatlan.exception.UnauthorizedReservationAccessException("No puede consultar reservas de otro usuario");
         }
 
         if (!userRepository.existsById(userId)) {
@@ -159,7 +186,7 @@ public class ReservationService {
 
         AuthenticatedUserPrincipal principal = SecurityUtils.currentUser();
         if (principal.role() == Role.USER && !reservation.getUser().getId().equals(principal.id())) {
-            throw new ForbiddenException("No puede cancelar reservas de otro usuario");
+            throw new com.pruebaTecnica.BancoCuscatlan.exception.UnauthorizedReservationAccessException("No puede cancelar reservas de otro usuario");
         }
 
         if (reservation.getStatus() == ReservationStatus.CANCELLED) {
@@ -168,6 +195,7 @@ public class ReservationService {
 
         reservation.setStatus(ReservationStatus.CANCELLED);
         Reservation updated = reservationRepository.save(reservation);
+        eventPublisher.publishEvent(new ReservationStatusChangedEvent(updated.getId(), updated.getStatus()));
         return reservationMapper.toResponse(updated);
     }
 
@@ -180,14 +208,28 @@ public class ReservationService {
 
         reservation.setStatus(status);
         Reservation updated = reservationRepository.save(reservation);
+        if (updated.getStatus() == ReservationStatus.CONFIRMED) {
+            publishConfirmedEvent(updated);
+        }
+        eventPublisher.publishEvent(new ReservationStatusChangedEvent(updated.getId(), updated.getStatus()));
         return reservationMapper.toResponse(updated);
     }
 
-    private String resolvePaymentReference(CreateReservationRequest request) {
+    private String resolvePaymentReference(CreateReservationRequest request, PaymentValidationResponse paymentResult) {
+        if (paymentResult.getTransactionId() != null && !paymentResult.getTransactionId().isBlank()) {
+            return paymentResult.getTransactionId();
+        }
+        return request.getPaymentReference();
+    }
+
+    private String resolvePaymentMethodId(CreateReservationRequest request) {
         if (request.getPaymentMethodId() != null && !request.getPaymentMethodId().isBlank()) {
             return request.getPaymentMethodId();
         }
-        return request.getPaymentReference();
+        if (request.getPaymentReference() != null && !request.getPaymentReference().isBlank()) {
+            return request.getPaymentReference();
+        }
+        throw new BadRequestException("Debe enviar paymentMethodId o paymentReference");
     }
 
     private void validateStatusTransition(ReservationStatus currentStatus, ReservationStatus newStatus) {
@@ -202,8 +244,22 @@ public class ReservationService {
         };
 
         if (!valid) {
-            throw new BadRequestException("Transición inválida de estado: " + currentStatus + " -> " + newStatus);
+            throw new com.pruebaTecnica.BancoCuscatlan.exception.InvalidReservationStateException(
+                    "Transición inválida de estado: " + currentStatus + " -> " + newStatus
+            );
         }
+    }
+
+    private void publishConfirmedEvent(Reservation reservation) {
+        eventPublisher.publishEvent(new ReservationConfirmedEvent(
+                reservation.getId(),
+                reservation.getUser().getId(),
+                reservation.getUser().getEmail(),
+                reservation.getUser().getName(),
+                reservation.getSpace().getId(),
+                reservation.getStartDateTime(),
+                reservation.getEndDateTime()
+        ));
     }
 
     private BigDecimal calculateTotalAmount(BigDecimal hourlyRate, java.time.LocalDateTime start, java.time.LocalDateTime end) {

@@ -23,11 +23,25 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.NOT_FOUND.value(),
-                "Not Found",
+                "RESOURCE_NOT_FOUND",
                 ex.getMessage(),
                 request.getRequestURI()
         );
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyExistsException(
+            EmailAlreadyExistsException ex,
+            HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "EMAIL_ALREADY_EXISTS",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(BadRequestException.class)
@@ -37,54 +51,110 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
-                "Bad Request",
+                "BAD_REQUEST",
                 ex.getMessage(),
                 request.getRequestURI()
         );
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
-        @ExceptionHandler(ConflictException.class)
-        public ResponseEntity<ErrorResponse> handleConflictException(
-                        ConflictException ex,
-                        HttpServletRequest request) {
-                ErrorResponse error = new ErrorResponse(
-                                LocalDateTime.now(),
-                                HttpStatus.CONFLICT.value(),
-                                "Conflict",
-                                ex.getMessage(),
-                                request.getRequestURI()
-                );
-                return new ResponseEntity<>(error, HttpStatus.CONFLICT);
-        }
+    @ExceptionHandler(OverlappingReservationException.class)
+    public ResponseEntity<ErrorResponse> handleOverlappingReservationException(
+            OverlappingReservationException ex,
+            HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "RESERVATION_OVERLAP",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
 
-        @ExceptionHandler(UnauthorizedException.class)
-        public ResponseEntity<ErrorResponse> handleUnauthorizedException(
-                        UnauthorizedException ex,
-                        HttpServletRequest request) {
-                ErrorResponse error = new ErrorResponse(
-                                LocalDateTime.now(),
-                                HttpStatus.UNAUTHORIZED.value(),
-                                "Unauthorized",
-                                ex.getMessage(),
-                                request.getRequestURI()
-                );
-                return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
-        }
+    @ExceptionHandler(ConflictException.class)
+    public ResponseEntity<ErrorResponse> handleConflictException(
+            ConflictException ex,
+            HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                "CONFLICT",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
 
-        @ExceptionHandler(ForbiddenException.class)
-        public ResponseEntity<ErrorResponse> handleForbiddenException(
-                        ForbiddenException ex,
-                        HttpServletRequest request) {
-                ErrorResponse error = new ErrorResponse(
-                                LocalDateTime.now(),
-                                HttpStatus.FORBIDDEN.value(),
-                                "Forbidden",
-                                ex.getMessage(),
-                                request.getRequestURI()
-                );
-                return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
-        }
+    @ExceptionHandler(InvalidReservationStateException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidReservationStateException(
+            InvalidReservationStateException ex,
+            HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "INVALID_RESERVATION_STATE",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UnauthorizedReservationAccessException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedReservationAccessException(
+            UnauthorizedReservationAccessException ex,
+            HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.FORBIDDEN.value(),
+                "UNAUTHORIZED_RESERVATION_ACCESS",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(PaymentValidationException.class)
+    public ResponseEntity<ErrorResponse> handlePaymentValidationException(
+            PaymentValidationException ex,
+            HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_GATEWAY.value(),
+                "PAYMENT_VALIDATION_ERROR",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(error, HttpStatus.BAD_GATEWAY);
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorizedException(
+            UnauthorizedException ex,
+            HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.UNAUTHORIZED.value(),
+                "UNAUTHORIZED",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<ErrorResponse> handleForbiddenException(
+            ForbiddenException ex,
+            HttpServletRequest request) {
+        ErrorResponse error = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.FORBIDDEN.value(),
+                "FORBIDDEN",
+                ex.getMessage(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(
@@ -98,7 +168,7 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.BAD_REQUEST.value(),
-                "Validation Failed",
+                "VALIDATION_ERROR",
                 "Error de validación en los campos",
                 request.getRequestURI(),
                 details
@@ -113,7 +183,7 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.NOT_FOUND.value(),
-                "Not Found",
+                "RESOURCE_NOT_FOUND",
                 ex.getMessage(),
                 request.getRequestURI()
         );
@@ -127,7 +197,7 @@ public class GlobalExceptionHandler {
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Internal Server Error",
+                                "INTERNAL_SERVER_ERROR",
                 "Ha ocurrido un error inesperado: " + ex.getMessage(),
                 request.getRequestURI()
         );
