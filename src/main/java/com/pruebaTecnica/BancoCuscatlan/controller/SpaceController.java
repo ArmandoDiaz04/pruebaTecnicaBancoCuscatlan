@@ -10,9 +10,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -50,5 +52,18 @@ public class SpaceController {
     @Operation(summary = "Listar espacios")
     public ResponseEntity<List<SpaceResponse>> getAllSpaces() {
         return ResponseEntity.ok(spaceService.getAllSpaces());
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Actualizar espacio", description = "Actualiza los datos de un espacio")
+    public ResponseEntity<SpaceResponse> updateSpace(@PathVariable Long id, @Valid @RequestBody CreateSpaceRequest request) {
+        return ResponseEntity.ok(spaceService.updateSpace(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    @Operation(summary = "Eliminar espacio", description = "Elimina un espacio por su id")
+    public ResponseEntity<Void> deleteSpace(@PathVariable Long id) {
+        spaceService.deleteSpace(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -3,16 +3,20 @@ package com.pruebaTecnica.BancoCuscatlan.service;
 import com.pruebaTecnica.BancoCuscatlan.domain.entity.Reservation;
 import com.pruebaTecnica.BancoCuscatlan.domain.entity.Space;
 import com.pruebaTecnica.BancoCuscatlan.domain.entity.User;
+import com.pruebaTecnica.BancoCuscatlan.domain.enums.Role;
 import com.pruebaTecnica.BancoCuscatlan.domain.enums.ReservationStatus;
 import com.pruebaTecnica.BancoCuscatlan.dto.CreateReservationRequest;
 import com.pruebaTecnica.BancoCuscatlan.dto.ReservationResponse;
 import com.pruebaTecnica.BancoCuscatlan.exception.BadRequestException;
 import com.pruebaTecnica.BancoCuscatlan.exception.ConflictException;
+import com.pruebaTecnica.BancoCuscatlan.exception.ForbiddenException;
 import com.pruebaTecnica.BancoCuscatlan.exception.ResourceNotFoundException;
 import com.pruebaTecnica.BancoCuscatlan.mapper.ReservationMapper;
 import com.pruebaTecnica.BancoCuscatlan.repository.ReservationRepository;
 import com.pruebaTecnica.BancoCuscatlan.repository.SpaceRepository;
 import com.pruebaTecnica.BancoCuscatlan.repository.UserRepository;
+import com.pruebaTecnica.BancoCuscatlan.security.AuthenticatedUserPrincipal;
+import com.pruebaTecnica.BancoCuscatlan.security.SecurityUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +52,11 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse createReservation(CreateReservationRequest request) {
+        AuthenticatedUserPrincipal principal = SecurityUtils.currentUser();
+        if (principal.role() == Role.USER && !principal.id().equals(request.getUserId())) {
+            throw new ForbiddenException("No puede crear reservas para otro usuario");
+        }
+
         User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con id: " + request.getUserId()));
 
@@ -91,11 +100,22 @@ public class ReservationService {
     public ReservationResponse getReservationById(Long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada con id: " + id));
+
+        AuthenticatedUserPrincipal principal = SecurityUtils.currentUser();
+        if (principal.role() == Role.USER && !reservation.getUser().getId().equals(principal.id())) {
+            throw new ForbiddenException("No puede consultar reservas de otro usuario");
+        }
+
         return reservationMapper.toResponse(reservation);
     }
 
     @Transactional(readOnly = true)
     public List<ReservationResponse> getReservationsByUser(Long userId) {
+        AuthenticatedUserPrincipal principal = SecurityUtils.currentUser();
+        if (principal.role() == Role.USER && !principal.id().equals(userId)) {
+            throw new ForbiddenException("No puede consultar reservas de otro usuario");
+        }
+
         if (!userRepository.existsById(userId)) {
             throw new ResourceNotFoundException("Usuario no encontrado con id: " + userId);
         }
@@ -103,6 +123,42 @@ public class ReservationService {
         return reservationRepository.findByUserId(userId).stream()
                 .map(reservationMapper::toResponse)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservationResponse> getAllReservations() {
+        return reservationRepository.findAll().stream()
+                .map(reservationMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional
+    public ReservationResponse cancelReservation(Long reservationId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada con id: " + reservationId));
+
+        AuthenticatedUserPrincipal principal = SecurityUtils.currentUser();
+        if (principal.role() == Role.USER && !reservation.getUser().getId().equals(principal.id())) {
+            throw new ForbiddenException("No puede cancelar reservas de otro usuario");
+        }
+
+        if (reservation.getStatus() == ReservationStatus.CANCELLED) {
+            throw new BadRequestException("La reserva ya está cancelada");
+        }
+
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        Reservation updated = reservationRepository.save(reservation);
+        return reservationMapper.toResponse(updated);
+    }
+
+    @Transactional
+    public ReservationResponse updateReservationStatus(Long reservationId, ReservationStatus status) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada con id: " + reservationId));
+
+        reservation.setStatus(status);
+        Reservation updated = reservationRepository.save(reservation);
+        return reservationMapper.toResponse(updated);
     }
 
     private BigDecimal calculateTotalAmount(BigDecimal hourlyRate, java.time.LocalDateTime start, java.time.LocalDateTime end) {

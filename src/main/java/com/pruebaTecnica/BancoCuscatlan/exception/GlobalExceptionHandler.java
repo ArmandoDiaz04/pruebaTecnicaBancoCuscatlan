@@ -58,6 +58,34 @@ public class GlobalExceptionHandler {
                 return new ResponseEntity<>(error, HttpStatus.CONFLICT);
         }
 
+        @ExceptionHandler(UnauthorizedException.class)
+        public ResponseEntity<ErrorResponse> handleUnauthorizedException(
+                        UnauthorizedException ex,
+                        HttpServletRequest request) {
+                ErrorResponse error = new ErrorResponse(
+                                LocalDateTime.now(),
+                                HttpStatus.UNAUTHORIZED.value(),
+                                "Unauthorized",
+                                ex.getMessage(),
+                                request.getRequestURI()
+                );
+                return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);
+        }
+
+        @ExceptionHandler(ForbiddenException.class)
+        public ResponseEntity<ErrorResponse> handleForbiddenException(
+                        ForbiddenException ex,
+                        HttpServletRequest request) {
+                ErrorResponse error = new ErrorResponse(
+                                LocalDateTime.now(),
+                                HttpStatus.FORBIDDEN.value(),
+                                "Forbidden",
+                                ex.getMessage(),
+                                request.getRequestURI()
+                );
+                return new ResponseEntity<>(error, HttpStatus.FORBIDDEN);
+        }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleValidationExceptions(
             MethodArgumentNotValidException ex,

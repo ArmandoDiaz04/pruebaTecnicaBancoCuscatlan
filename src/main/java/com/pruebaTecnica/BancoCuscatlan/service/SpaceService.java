@@ -45,4 +45,28 @@ public class SpaceService {
                 .map(spaceMapper::toResponse)
                 .toList();
     }
+
+    @Transactional
+    public SpaceResponse updateSpace(Long id, CreateSpaceRequest request) {
+        Space existing = spaceRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Espacio no encontrado con id: " + id));
+
+        existing.setName(request.getName());
+        existing.setType(request.getType());
+        existing.setCapacity(request.getCapacity());
+        existing.setLocation(request.getLocation());
+        existing.setHourlyRate(request.getHourlyRate());
+        existing.setActive(request.getActive() != null ? request.getActive() : existing.getActive());
+
+        Space updated = spaceRepository.save(existing);
+        return spaceMapper.toResponse(updated);
+    }
+
+    @Transactional
+    public void deleteSpace(Long id) {
+        if (!spaceRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Espacio no encontrado con id: " + id);
+        }
+        spaceRepository.deleteById(id);
+    }
 }

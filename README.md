@@ -229,13 +229,66 @@ mvn clean package -DskipTests
 
 ## 🔒 Seguridad
 
-La configuración actual es **permisiva para desarrollo**:
-- `/api/health` - Acceso público
-- `/actuator/**` - Acceso público
-- `/swagger-ui/**` - Acceso público
-- Resto de endpoints - Acceso público (temporal)
+La API usa **Spring Security + JWT (Bearer Token)** con autorización por roles.
 
-**⚠️ Importante:** En producción, implementar autenticación y autorización apropiadas.
+### Endpoints públicos
+
+- `POST /api/auth/register`
+- `POST /api/auth/login`
+- `GET /api/health`
+- `/actuator/**`
+- `/swagger-ui/**`
+- `/api-docs/**`
+
+### Flujo de autenticación
+
+1. Registrar usuario:
+
+```http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Raul Valencia",
+  "email": "raul@email.com",
+  "password": "Password123"
+}
+```
+
+2. Iniciar sesión:
+
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "raul@email.com",
+  "password": "Password123"
+}
+```
+
+3. Usar token en rutas protegidas:
+
+```http
+Authorization: Bearer <jwt>
+```
+
+### Matriz de permisos
+
+- **ADMIN**
+  - CRUD completo de espacios
+  - Ver todas las reservas
+  - Gestionar estado de todas las reservas
+  - Ver reportes
+- **USER**
+  - Crear reservas
+  - Ver solo sus reservas
+  - Cancelar solo sus reservas
+
+### Respuestas de seguridad
+
+- `401 Unauthorized`: token ausente/inválido
+- `403 Forbidden`: autenticado pero sin permisos
 
 ## 📝 Próximos Pasos
 
@@ -243,7 +296,7 @@ La configuración actual es **permisiva para desarrollo**:
 - [ ] Crear servicios de negocio
 - [ ] Implementar repositories
 - [ ] Agregar mappers con MapStruct
-- [ ] Implementar autenticación JWT
+- [x] Implementar autenticación JWT
 - [ ] Agregar tests unitarios y de integración
 - [ ] Configurar perfiles (dev, test, prod)
 - [ ] Implementar Circuit Breaker con Resilience4j

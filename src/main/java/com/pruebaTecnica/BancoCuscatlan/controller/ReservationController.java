@@ -2,6 +2,7 @@ package com.pruebaTecnica.BancoCuscatlan.controller;
 
 import com.pruebaTecnica.BancoCuscatlan.dto.CreateReservationRequest;
 import com.pruebaTecnica.BancoCuscatlan.dto.ReservationResponse;
+import com.pruebaTecnica.BancoCuscatlan.dto.UpdateReservationStatusRequest;
 import com.pruebaTecnica.BancoCuscatlan.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -41,6 +43,12 @@ public class ReservationController {
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationService.createReservation(request));
     }
 
+    @GetMapping
+    @Operation(summary = "Listar todas las reservas (ADMIN)")
+    public ResponseEntity<List<ReservationResponse>> getAllReservations() {
+        return ResponseEntity.ok(reservationService.getAllReservations());
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Obtener reserva por id")
     public ResponseEntity<ReservationResponse> getReservationById(@PathVariable Long id) {
@@ -51,5 +59,20 @@ public class ReservationController {
     @Operation(summary = "Listar reservas por usuario")
     public ResponseEntity<List<ReservationResponse>> getReservationsByUser(@PathVariable Long userId) {
         return ResponseEntity.ok(reservationService.getReservationsByUser(userId));
+    }
+
+    @PatchMapping("/{id}/cancel")
+    @Operation(summary = "Cancelar reserva", description = "USER puede cancelar sus reservas, ADMIN cualquiera")
+    public ResponseEntity<ReservationResponse> cancelReservation(@PathVariable Long id) {
+        return ResponseEntity.ok(reservationService.cancelReservation(id));
+    }
+
+    @PatchMapping("/{id}/status")
+    @Operation(summary = "Actualizar estado de reserva (ADMIN)")
+    public ResponseEntity<ReservationResponse> updateReservationStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateReservationStatusRequest request
+    ) {
+        return ResponseEntity.ok(reservationService.updateReservationStatus(id, request.getStatus()));
     }
 }
