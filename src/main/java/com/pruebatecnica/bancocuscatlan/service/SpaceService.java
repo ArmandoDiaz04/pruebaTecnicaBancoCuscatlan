@@ -1,12 +1,12 @@
-package com.pruebaTecnica.BancoCuscatlan.service;
+package com.pruebatecnica.bancocuscatlan.service;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.entity.Space;
-import com.pruebaTecnica.BancoCuscatlan.dto.CreateSpaceRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.SpaceResponse;
-import com.pruebaTecnica.BancoCuscatlan.event.SpaceChangedEvent;
-import com.pruebaTecnica.BancoCuscatlan.exception.ResourceNotFoundException;
-import com.pruebaTecnica.BancoCuscatlan.mapper.SpaceMapper;
-import com.pruebaTecnica.BancoCuscatlan.repository.SpaceRepository;
+import com.pruebatecnica.bancocuscatlan.domain.entity.Space;
+import com.pruebatecnica.bancocuscatlan.dto.CreateSpaceRequest;
+import com.pruebatecnica.bancocuscatlan.dto.SpaceResponse;
+import com.pruebatecnica.bancocuscatlan.event.SpaceChangedEvent;
+import com.pruebatecnica.bancocuscatlan.exception.ResourceNotFoundException;
+import com.pruebatecnica.bancocuscatlan.mapper.SpaceMapper;
+import com.pruebatecnica.bancocuscatlan.repository.SpaceRepository;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

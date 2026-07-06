@@ -1,26 +1,26 @@
-package com.pruebaTecnica.BancoCuscatlan.service;
+package com.pruebatecnica.bancocuscatlan.service;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.entity.Reservation;
-import com.pruebaTecnica.BancoCuscatlan.domain.entity.Space;
-import com.pruebaTecnica.BancoCuscatlan.domain.entity.User;
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.Role;
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.ReservationStatus;
-import com.pruebaTecnica.BancoCuscatlan.dto.CreateReservationRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.PaymentValidationRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.PaymentValidationResponse;
-import com.pruebaTecnica.BancoCuscatlan.dto.ReservationResponse;
-import com.pruebaTecnica.BancoCuscatlan.exception.BadRequestException;
-import com.pruebaTecnica.BancoCuscatlan.exception.ForbiddenException;
-import com.pruebaTecnica.BancoCuscatlan.exception.OverlappingReservationException;
-import com.pruebaTecnica.BancoCuscatlan.exception.ResourceNotFoundException;
-import com.pruebaTecnica.BancoCuscatlan.event.ReservationConfirmedEvent;
-import com.pruebaTecnica.BancoCuscatlan.event.ReservationStatusChangedEvent;
-import com.pruebaTecnica.BancoCuscatlan.mapper.ReservationMapper;
-import com.pruebaTecnica.BancoCuscatlan.repository.ReservationRepository;
-import com.pruebaTecnica.BancoCuscatlan.repository.SpaceRepository;
-import com.pruebaTecnica.BancoCuscatlan.repository.UserRepository;
-import com.pruebaTecnica.BancoCuscatlan.security.AuthenticatedUserPrincipal;
-import com.pruebaTecnica.BancoCuscatlan.security.SecurityUtils;
+import com.pruebatecnica.bancocuscatlan.domain.entity.Reservation;
+import com.pruebatecnica.bancocuscatlan.domain.entity.Space;
+import com.pruebatecnica.bancocuscatlan.domain.entity.User;
+import com.pruebatecnica.bancocuscatlan.domain.enums.Role;
+import com.pruebatecnica.bancocuscatlan.domain.enums.ReservationStatus;
+import com.pruebatecnica.bancocuscatlan.dto.CreateReservationRequest;
+import com.pruebatecnica.bancocuscatlan.dto.PaymentValidationRequest;
+import com.pruebatecnica.bancocuscatlan.dto.PaymentValidationResponse;
+import com.pruebatecnica.bancocuscatlan.dto.ReservationResponse;
+import com.pruebatecnica.bancocuscatlan.exception.BadRequestException;
+import com.pruebatecnica.bancocuscatlan.exception.ForbiddenException;
+import com.pruebatecnica.bancocuscatlan.exception.OverlappingReservationException;
+import com.pruebatecnica.bancocuscatlan.exception.ResourceNotFoundException;
+import com.pruebatecnica.bancocuscatlan.event.ReservationConfirmedEvent;
+import com.pruebatecnica.bancocuscatlan.event.ReservationStatusChangedEvent;
+import com.pruebatecnica.bancocuscatlan.mapper.ReservationMapper;
+import com.pruebatecnica.bancocuscatlan.repository.ReservationRepository;
+import com.pruebatecnica.bancocuscatlan.repository.SpaceRepository;
+import com.pruebatecnica.bancocuscatlan.repository.UserRepository;
+import com.pruebatecnica.bancocuscatlan.security.AuthenticatedUserPrincipal;
+import com.pruebatecnica.bancocuscatlan.security.SecurityUtils;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -155,7 +155,7 @@ public class ReservationService {
     public List<ReservationResponse> getReservationsByUser(Long userId) {
         AuthenticatedUserPrincipal principal = SecurityUtils.currentUser();
         if (principal.role() == Role.USER && !principal.id().equals(userId)) {
-            throw new com.pruebaTecnica.BancoCuscatlan.exception.UnauthorizedReservationAccessException("No puede consultar reservas de otro usuario");
+            throw new com.pruebatecnica.bancocuscatlan.exception.UnauthorizedReservationAccessException("No puede consultar reservas de otro usuario");
         }
 
         if (!userRepository.existsById(userId)) {
@@ -186,7 +186,7 @@ public class ReservationService {
 
         AuthenticatedUserPrincipal principal = SecurityUtils.currentUser();
         if (principal.role() == Role.USER && !reservation.getUser().getId().equals(principal.id())) {
-            throw new com.pruebaTecnica.BancoCuscatlan.exception.UnauthorizedReservationAccessException("No puede cancelar reservas de otro usuario");
+            throw new com.pruebatecnica.bancocuscatlan.exception.UnauthorizedReservationAccessException("No puede cancelar reservas de otro usuario");
         }
 
         if (reservation.getStatus() == ReservationStatus.CANCELLED) {
@@ -244,7 +244,7 @@ public class ReservationService {
         };
 
         if (!valid) {
-            throw new com.pruebaTecnica.BancoCuscatlan.exception.InvalidReservationStateException(
+            throw new com.pruebatecnica.bancocuscatlan.exception.InvalidReservationStateException(
                     "Transición inválida de estado: " + currentStatus + " -> " + newStatus
             );
         }

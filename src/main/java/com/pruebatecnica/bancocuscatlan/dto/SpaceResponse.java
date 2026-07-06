@@ -1,6 +1,6 @@
-package com.pruebaTecnica.BancoCuscatlan.dto;
+package com.pruebatecnica.bancocuscatlan.dto;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.SpaceType;
+import com.pruebatecnica.bancocuscatlan.domain.enums.SpaceType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

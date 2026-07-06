@@ -1,6 +1,6 @@
-package com.pruebaTecnica.BancoCuscatlan.repository;
+package com.pruebatecnica.bancocuscatlan.repository;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.entity.User;
+import com.pruebatecnica.bancocuscatlan.domain.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

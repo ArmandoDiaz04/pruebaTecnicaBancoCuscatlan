@@ -1,7 +1,7 @@
-package com.pruebaTecnica.BancoCuscatlan.client;
+package com.pruebatecnica.bancocuscatlan.client;
 
-import com.pruebaTecnica.BancoCuscatlan.dto.PaymentValidationRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.PaymentValidationResponse;
+import com.pruebatecnica.bancocuscatlan.dto.PaymentValidationRequest;
+import com.pruebatecnica.bancocuscatlan.dto.PaymentValidationResponse;
 
 public interface PaymentValidationClient {
 

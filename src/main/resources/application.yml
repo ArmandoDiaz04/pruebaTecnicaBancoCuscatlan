@@ -50,7 +50,7 @@ server:
 logging:
   level:
     root: INFO
-    com.pruebaTecnica.BancoCuscatlan: DEBUG
-    org.springframework.web: INFO
+    "[com.pruebatecnica.bancocuscatlan]": DEBUG
+    "[org.springframework.web]": INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"

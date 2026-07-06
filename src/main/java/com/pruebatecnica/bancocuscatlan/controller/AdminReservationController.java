@@ -1,8 +1,8 @@
-package com.pruebaTecnica.BancoCuscatlan.controller;
+package com.pruebatecnica.bancocuscatlan.controller;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.ReservationStatus;
-import com.pruebaTecnica.BancoCuscatlan.dto.ReservationResponse;
-import com.pruebaTecnica.BancoCuscatlan.service.ReservationService;
+import com.pruebatecnica.bancocuscatlan.domain.enums.ReservationStatus;
+import com.pruebatecnica.bancocuscatlan.dto.ReservationResponse;
+import com.pruebatecnica.bancocuscatlan.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;

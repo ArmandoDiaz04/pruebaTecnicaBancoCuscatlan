@@ -1,9 +1,9 @@
-package com.pruebaTecnica.BancoCuscatlan.client;
+package com.pruebatecnica.bancocuscatlan.client;
 
-import com.pruebaTecnica.BancoCuscatlan.config.AppProperties;
-import com.pruebaTecnica.BancoCuscatlan.dto.PaymentValidationRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.PaymentValidationResponse;
-import com.pruebaTecnica.BancoCuscatlan.exception.PaymentValidationException;
+import com.pruebatecnica.bancocuscatlan.config.AppProperties;
+import com.pruebatecnica.bancocuscatlan.dto.PaymentValidationRequest;
+import com.pruebatecnica.bancocuscatlan.dto.PaymentValidationResponse;
+import com.pruebatecnica.bancocuscatlan.exception.PaymentValidationException;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;

@@ -1,9 +1,9 @@
-package com.pruebaTecnica.BancoCuscatlan.controller;
+package com.pruebatecnica.bancocuscatlan.controller;
 
-import com.pruebaTecnica.BancoCuscatlan.dto.CreateReservationRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.ReservationResponse;
-import com.pruebaTecnica.BancoCuscatlan.dto.UpdateReservationStatusRequest;
-import com.pruebaTecnica.BancoCuscatlan.service.ReservationService;
+import com.pruebatecnica.bancocuscatlan.dto.CreateReservationRequest;
+import com.pruebatecnica.bancocuscatlan.dto.ReservationResponse;
+import com.pruebatecnica.bancocuscatlan.dto.UpdateReservationStatusRequest;
+import com.pruebatecnica.bancocuscatlan.service.ReservationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

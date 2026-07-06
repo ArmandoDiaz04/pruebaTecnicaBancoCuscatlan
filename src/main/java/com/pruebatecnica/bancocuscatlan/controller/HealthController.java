@@ -1,6 +1,6 @@
-package com.pruebaTecnica.BancoCuscatlan.controller;
+package com.pruebatecnica.bancocuscatlan.controller;
 
-import com.pruebaTecnica.BancoCuscatlan.dto.HealthResponse;
+import com.pruebatecnica.bancocuscatlan.dto.HealthResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

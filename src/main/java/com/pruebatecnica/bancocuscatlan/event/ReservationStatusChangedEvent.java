@@ -1,6 +1,6 @@
-package com.pruebaTecnica.BancoCuscatlan.event;
+package com.pruebatecnica.bancocuscatlan.event;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.ReservationStatus;
+import com.pruebatecnica.bancocuscatlan.domain.enums.ReservationStatus;
 
 public record ReservationStatusChangedEvent(Long reservationId, ReservationStatus status) {
 }

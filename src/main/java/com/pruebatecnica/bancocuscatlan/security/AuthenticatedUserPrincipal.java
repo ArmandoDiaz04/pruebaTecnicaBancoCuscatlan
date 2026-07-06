@@ -1,6 +1,6 @@
-package com.pruebaTecnica.BancoCuscatlan.security;
+package com.pruebatecnica.bancocuscatlan.security;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.Role;
+import com.pruebatecnica.bancocuscatlan.domain.enums.Role;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 

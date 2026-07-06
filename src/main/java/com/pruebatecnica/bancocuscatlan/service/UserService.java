@@ -1,14 +1,14 @@
-package com.pruebaTecnica.BancoCuscatlan.service;
+package com.pruebatecnica.bancocuscatlan.service;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.entity.User;
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.Role;
-import com.pruebaTecnica.BancoCuscatlan.dto.CreateUserRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.UserResponse;
-import com.pruebaTecnica.BancoCuscatlan.exception.BadRequestException;
-import com.pruebaTecnica.BancoCuscatlan.exception.EmailAlreadyExistsException;
-import com.pruebaTecnica.BancoCuscatlan.exception.ResourceNotFoundException;
-import com.pruebaTecnica.BancoCuscatlan.mapper.UserMapper;
-import com.pruebaTecnica.BancoCuscatlan.repository.UserRepository;
+import com.pruebatecnica.bancocuscatlan.domain.entity.User;
+import com.pruebatecnica.bancocuscatlan.domain.enums.Role;
+import com.pruebatecnica.bancocuscatlan.dto.CreateUserRequest;
+import com.pruebatecnica.bancocuscatlan.dto.UserResponse;
+import com.pruebatecnica.bancocuscatlan.exception.BadRequestException;
+import com.pruebatecnica.bancocuscatlan.exception.EmailAlreadyExistsException;
+import com.pruebatecnica.bancocuscatlan.exception.ResourceNotFoundException;
+import com.pruebatecnica.bancocuscatlan.mapper.UserMapper;
+import com.pruebatecnica.bancocuscatlan.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

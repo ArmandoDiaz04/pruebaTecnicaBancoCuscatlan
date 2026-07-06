@@ -1,6 +1,6 @@
-package com.pruebaTecnica.BancoCuscatlan;
+package com.pruebatecnica.bancocuscatlan;
 
-import com.pruebaTecnica.BancoCuscatlan.config.AppProperties;
+import com.pruebatecnica.bancocuscatlan.config.AppProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

@@ -1,4 +1,4 @@
-package com.pruebaTecnica.BancoCuscatlan.exception;
+package com.pruebatecnica.bancocuscatlan.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;

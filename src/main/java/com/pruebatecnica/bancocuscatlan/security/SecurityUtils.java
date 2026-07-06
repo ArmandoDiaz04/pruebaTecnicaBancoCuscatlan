@@ -1,7 +1,7 @@
-package com.pruebaTecnica.BancoCuscatlan.security;
+package com.pruebatecnica.bancocuscatlan.security;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.Role;
-import com.pruebaTecnica.BancoCuscatlan.exception.UnauthorizedException;
+import com.pruebatecnica.bancocuscatlan.domain.enums.Role;
+import com.pruebatecnica.bancocuscatlan.exception.UnauthorizedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 

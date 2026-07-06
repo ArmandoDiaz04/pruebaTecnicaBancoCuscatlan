@@ -1,8 +1,8 @@
-package com.pruebaTecnica.BancoCuscatlan.controller;
+package com.pruebatecnica.bancocuscatlan.controller;
 
-import com.pruebaTecnica.BancoCuscatlan.dto.CreateUserRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.UserResponse;
-import com.pruebaTecnica.BancoCuscatlan.service.UserService;
+import com.pruebatecnica.bancocuscatlan.dto.CreateUserRequest;
+import com.pruebatecnica.bancocuscatlan.dto.UserResponse;
+import com.pruebatecnica.bancocuscatlan.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

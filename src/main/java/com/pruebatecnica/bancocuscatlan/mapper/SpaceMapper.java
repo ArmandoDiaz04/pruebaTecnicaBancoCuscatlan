@@ -1,8 +1,8 @@
-package com.pruebaTecnica.BancoCuscatlan.mapper;
+package com.pruebatecnica.bancocuscatlan.mapper;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.entity.Space;
-import com.pruebaTecnica.BancoCuscatlan.dto.CreateSpaceRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.SpaceResponse;
+import com.pruebatecnica.bancocuscatlan.domain.entity.Space;
+import com.pruebatecnica.bancocuscatlan.dto.CreateSpaceRequest;
+import com.pruebatecnica.bancocuscatlan.dto.SpaceResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

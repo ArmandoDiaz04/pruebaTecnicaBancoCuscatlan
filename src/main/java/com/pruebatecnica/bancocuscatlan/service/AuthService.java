@@ -1,15 +1,15 @@
-package com.pruebaTecnica.BancoCuscatlan.service;
+package com.pruebatecnica.bancocuscatlan.service;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.entity.User;
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.Role;
-import com.pruebaTecnica.BancoCuscatlan.dto.AuthResponse;
-import com.pruebaTecnica.BancoCuscatlan.dto.CreateUserRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.LoginRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.RegisterRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.UserResponse;
-import com.pruebaTecnica.BancoCuscatlan.exception.UnauthorizedException;
-import com.pruebaTecnica.BancoCuscatlan.repository.UserRepository;
-import com.pruebaTecnica.BancoCuscatlan.security.JwtTokenProvider;
+import com.pruebatecnica.bancocuscatlan.domain.entity.User;
+import com.pruebatecnica.bancocuscatlan.domain.enums.Role;
+import com.pruebatecnica.bancocuscatlan.dto.AuthResponse;
+import com.pruebatecnica.bancocuscatlan.dto.CreateUserRequest;
+import com.pruebatecnica.bancocuscatlan.dto.LoginRequest;
+import com.pruebatecnica.bancocuscatlan.dto.RegisterRequest;
+import com.pruebatecnica.bancocuscatlan.dto.UserResponse;
+import com.pruebatecnica.bancocuscatlan.exception.UnauthorizedException;
+import com.pruebatecnica.bancocuscatlan.repository.UserRepository;
+import com.pruebatecnica.bancocuscatlan.security.JwtTokenProvider;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

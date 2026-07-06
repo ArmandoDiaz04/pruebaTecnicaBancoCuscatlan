@@ -1,8 +1,8 @@
-package com.pruebaTecnica.BancoCuscatlan.mapper;
+package com.pruebatecnica.bancocuscatlan.mapper;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.entity.User;
-import com.pruebaTecnica.BancoCuscatlan.dto.CreateUserRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.UserResponse;
+import com.pruebatecnica.bancocuscatlan.domain.entity.User;
+import com.pruebatecnica.bancocuscatlan.dto.CreateUserRequest;
+import com.pruebatecnica.bancocuscatlan.dto.UserResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

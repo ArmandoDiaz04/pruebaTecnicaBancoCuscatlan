@@ -1,10 +1,10 @@
-package com.pruebaTecnica.BancoCuscatlan.controller;
+package com.pruebatecnica.bancocuscatlan.controller;
 
-import com.pruebaTecnica.BancoCuscatlan.dto.AuthResponse;
-import com.pruebaTecnica.BancoCuscatlan.dto.LoginRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.RegisterRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.UserResponse;
-import com.pruebaTecnica.BancoCuscatlan.service.AuthService;
+import com.pruebatecnica.bancocuscatlan.dto.AuthResponse;
+import com.pruebatecnica.bancocuscatlan.dto.LoginRequest;
+import com.pruebatecnica.bancocuscatlan.dto.RegisterRequest;
+import com.pruebatecnica.bancocuscatlan.dto.UserResponse;
+import com.pruebatecnica.bancocuscatlan.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

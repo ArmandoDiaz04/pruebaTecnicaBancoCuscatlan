@@ -8,8 +8,11 @@ API REST para el sistema bancario de Banco Cuscatlán construida con Spring Boot
 - [Estructura del Proyecto](#estructura-del-proyecto)
 - [Configuración](#configuración)
 - [Ejecución](#ejecución)
+- [Docker](#docker)
+- [Requests HTTP](#requests-http)
 - [Endpoints](#endpoints)
 - [Testing](#testing)
+- [Decisiones Técnicas](#decisiones-técnicas)
 
 ## 🚀 Tecnologías
 
@@ -36,7 +39,7 @@ API REST para el sistema bancario de Banco Cuscatlán construida con Spring Boot
 ## 📂 Estructura del Proyecto
 
 ```
-src/main/java/com/pruebaTecnica/BancoCuscatlan/
+src/main/java/com/pruebatecnica/bancocuscatlan/
 ├── BancoCuscatlanApplication.java  # Clase principal
 ├── controller/                      # Controladores REST
 │   └── HealthController.java
@@ -172,6 +175,39 @@ java -jar target/BancoCuscatlan-0.0.1-SNAPSHOT.jar
 Ejecutar la clase `BancoCuscatlanApplication.java` desde tu IDE favorito.
 
 La aplicación estará disponible en: **http://localhost:8080**
+
+## 🐳 Docker
+
+El proyecto incluye un `Dockerfile` multi-stage y `docker-compose.yml` para levantar la API junto con PostgreSQL.
+
+### Levantar todo con Docker Compose
+
+```bash
+docker compose up --build
+```
+
+La API queda disponible en:
+
+- `http://localhost:8080`
+
+La base de datos queda disponible en:
+
+- `localhost:5432`
+
+El compose configura el perfil `prod` y pasa las variables necesarias para DB, JWT, cache y pago simulado.
+
+## 🧾 Requests HTTP
+
+Se incluye el archivo [requests.http](requests.http) con ejemplos listos para usar en VS Code o IntelliJ:
+
+- registro y login
+- creación y listado de espacios
+- creación y cancelación de reservas
+- reporte de reservas y ocupación
+- health y actuator
+- validación mock de pago
+
+El archivo usa variables `@baseUrl`, `@userToken` y `@adminToken` para que puedas pegar el JWT real de cada rol.
 
 ## 🌐 Endpoints
 
@@ -318,6 +354,36 @@ La API usa **Spring Security + JWT (Bearer Token)** con autorización por roles.
 ### Flujo de autenticación
 
 1. Registrar usuario:
+
+## 🧠 Decisiones Técnicas
+
+### Arquitectura
+
+La aplicación está organizada en capas: controller, service, repository, dto, mapper, security y config. Esa separación permite cambiar reglas de negocio sin mezclar validación HTTP, persistencia y seguridad.
+
+### JWT y roles
+
+Se usa Spring Security con JWT Bearer para mantener sesiones sin estado. `USER` puede operar sobre sus propias reservas y `ADMIN` puede gestionar recursos globales.
+
+### DTOs y validación
+
+Los controladores exponen DTOs de entrada y salida en lugar de entidades JPA. Eso reduce acoplamiento y evita filtrar campos internos. Bean Validation protege el borde HTTP.
+
+### `@ConfigurationProperties`
+
+Las propiedades `app.jwt`, `app.cache` y `app.payment` se agrupan en una clase tipada para evitar cadenas sueltas con `@Value`.
+
+### Cache y eventos
+
+El reporte de ocupación se cachea y se invalida por eventos de dominio. Esto mantiene un buen balance entre rendimiento y consistencia.
+
+### Resilience4j
+
+La validación de pago está protegida con Circuit Breaker y TimeLimiter. Si el proveedor simulado falla, la reserva no se cae: queda en `PENDING_PAYMENT`.
+
+### Java 21
+
+El proyecto compila y corre sobre Java 21. Esa es la versión correcta para esta base de código y es la que se documenta en este repositorio.
 
 ```http
 POST /api/auth/register

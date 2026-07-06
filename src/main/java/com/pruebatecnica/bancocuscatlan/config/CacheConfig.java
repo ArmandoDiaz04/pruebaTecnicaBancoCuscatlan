@@ -1,4 +1,4 @@
-package com.pruebaTecnica.BancoCuscatlan.config;
+package com.pruebatecnica.bancocuscatlan.config;
 
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Configuration;

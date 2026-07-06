@@ -1,4 +1,4 @@
-package com.pruebaTecnica.BancoCuscatlan.event;
+package com.pruebatecnica.bancocuscatlan.event;
 
 import java.time.LocalDateTime;
 

@@ -1,6 +1,6 @@
-package com.pruebaTecnica.BancoCuscatlan.dto;
+package com.pruebatecnica.bancocuscatlan.dto;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.SpaceType;
+import com.pruebatecnica.bancocuscatlan.domain.enums.SpaceType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

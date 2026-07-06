@@ -1,8 +1,8 @@
-package com.pruebaTecnica.BancoCuscatlan.security;
+package com.pruebatecnica.bancocuscatlan.security;
 
-import com.pruebaTecnica.BancoCuscatlan.config.AppProperties;
-import com.pruebaTecnica.BancoCuscatlan.domain.entity.User;
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.Role;
+import com.pruebatecnica.bancocuscatlan.config.AppProperties;
+import com.pruebatecnica.bancocuscatlan.domain.entity.User;
+import com.pruebatecnica.bancocuscatlan.domain.enums.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;

@@ -1,8 +1,8 @@
-package com.pruebaTecnica.BancoCuscatlan.controller;
+package com.pruebatecnica.bancocuscatlan.controller;
 
-import com.pruebaTecnica.BancoCuscatlan.dto.CreateSpaceRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.SpaceResponse;
-import com.pruebaTecnica.BancoCuscatlan.service.SpaceService;
+import com.pruebatecnica.bancocuscatlan.dto.CreateSpaceRequest;
+import com.pruebatecnica.bancocuscatlan.dto.SpaceResponse;
+import com.pruebatecnica.bancocuscatlan.service.SpaceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;

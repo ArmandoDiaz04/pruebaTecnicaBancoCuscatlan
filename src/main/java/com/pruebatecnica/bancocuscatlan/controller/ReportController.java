@@ -1,8 +1,8 @@
-package com.pruebaTecnica.BancoCuscatlan.controller;
+package com.pruebatecnica.bancocuscatlan.controller;
 
-import com.pruebaTecnica.BancoCuscatlan.dto.OccupancyReportResponse;
-import com.pruebaTecnica.BancoCuscatlan.dto.ReservationReportResponse;
-import com.pruebaTecnica.BancoCuscatlan.service.ReportService;
+import com.pruebatecnica.bancocuscatlan.dto.OccupancyReportResponse;
+import com.pruebatecnica.bancocuscatlan.dto.ReservationReportResponse;
+import com.pruebatecnica.bancocuscatlan.service.ReportService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;

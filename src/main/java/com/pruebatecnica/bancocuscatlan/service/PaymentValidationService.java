@@ -1,8 +1,8 @@
-package com.pruebaTecnica.BancoCuscatlan.service;
+package com.pruebatecnica.bancocuscatlan.service;
 
-import com.pruebaTecnica.BancoCuscatlan.client.PaymentValidationClient;
-import com.pruebaTecnica.BancoCuscatlan.dto.PaymentValidationRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.PaymentValidationResponse;
+import com.pruebatecnica.bancocuscatlan.client.PaymentValidationClient;
+import com.pruebatecnica.bancocuscatlan.dto.PaymentValidationRequest;
+import com.pruebatecnica.bancocuscatlan.dto.PaymentValidationResponse;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import org.springframework.stereotype.Service;

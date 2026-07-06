@@ -1,8 +1,8 @@
-package com.pruebaTecnica.BancoCuscatlan.config;
+package com.pruebatecnica.bancocuscatlan.config;
 
-import com.pruebaTecnica.BancoCuscatlan.security.JwtAccessDeniedHandler;
-import com.pruebaTecnica.BancoCuscatlan.security.JwtAuthenticationEntryPoint;
-import com.pruebaTecnica.BancoCuscatlan.security.JwtAuthenticationFilter;
+import com.pruebatecnica.bancocuscatlan.security.JwtAccessDeniedHandler;
+import com.pruebatecnica.bancocuscatlan.security.JwtAuthenticationEntryPoint;
+import com.pruebatecnica.bancocuscatlan.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;

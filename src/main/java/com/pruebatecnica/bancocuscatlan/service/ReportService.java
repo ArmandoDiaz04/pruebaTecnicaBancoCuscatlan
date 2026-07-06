@@ -1,12 +1,12 @@
-package com.pruebaTecnica.BancoCuscatlan.service;
+package com.pruebatecnica.bancocuscatlan.service;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.ReservationStatus;
-import com.pruebaTecnica.BancoCuscatlan.dto.OccupancyReportResponse;
-import com.pruebaTecnica.BancoCuscatlan.dto.ReservationReportResponse;
-import com.pruebaTecnica.BancoCuscatlan.exception.BadRequestException;
-import com.pruebaTecnica.BancoCuscatlan.repository.SpaceRepository;
+import com.pruebatecnica.bancocuscatlan.domain.enums.ReservationStatus;
+import com.pruebatecnica.bancocuscatlan.dto.OccupancyReportResponse;
+import com.pruebatecnica.bancocuscatlan.dto.ReservationReportResponse;
+import com.pruebatecnica.bancocuscatlan.exception.BadRequestException;
+import com.pruebatecnica.bancocuscatlan.repository.SpaceRepository;
 import org.springframework.cache.annotation.Cacheable;
-import com.pruebaTecnica.BancoCuscatlan.repository.ReservationRepository;
+import com.pruebatecnica.bancocuscatlan.repository.ReservationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

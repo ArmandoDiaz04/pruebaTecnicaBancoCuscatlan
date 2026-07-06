@@ -1,6 +1,6 @@
-package com.pruebaTecnica.BancoCuscatlan.dto;
+package com.pruebatecnica.bancocuscatlan.dto;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.ReservationStatus;
+import com.pruebatecnica.bancocuscatlan.domain.enums.ReservationStatus;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;

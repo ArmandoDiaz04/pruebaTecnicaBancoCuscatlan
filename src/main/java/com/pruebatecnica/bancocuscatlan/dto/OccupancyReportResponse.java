@@ -1,4 +1,4 @@
-package com.pruebaTecnica.BancoCuscatlan.dto;
+package com.pruebatecnica.bancocuscatlan.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

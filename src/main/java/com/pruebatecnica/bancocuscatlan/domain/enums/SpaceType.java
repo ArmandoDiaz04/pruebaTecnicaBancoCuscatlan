@@ -1,4 +1,4 @@
-package com.pruebaTecnica.BancoCuscatlan.domain.enums;
+package com.pruebatecnica.bancocuscatlan.domain.enums;
 
 public enum SpaceType {
     MEETING_ROOM,

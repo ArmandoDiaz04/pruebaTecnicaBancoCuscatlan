@@ -1,7 +1,7 @@
-package com.pruebaTecnica.BancoCuscatlan.repository;
+package com.pruebatecnica.bancocuscatlan.repository;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.entity.Reservation;
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.ReservationStatus;
+import com.pruebatecnica.bancocuscatlan.domain.entity.Reservation;
+import com.pruebatecnica.bancocuscatlan.domain.enums.ReservationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

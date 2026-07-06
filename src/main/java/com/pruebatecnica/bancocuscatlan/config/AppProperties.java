@@ -1,4 +1,4 @@
-package com.pruebaTecnica.BancoCuscatlan.config;
+package com.pruebatecnica.bancocuscatlan.config;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;

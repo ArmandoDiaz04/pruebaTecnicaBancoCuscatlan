@@ -1,6 +1,6 @@
-package com.pruebaTecnica.BancoCuscatlan.dto;
+package com.pruebatecnica.bancocuscatlan.dto;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.Role;
+import com.pruebatecnica.bancocuscatlan.domain.enums.Role;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;

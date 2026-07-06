@@ -1,0 +1,94 @@
+@baseUrl = http://localhost:8080
+@json = application/json
+
+### Health
+GET {{baseUrl}}/api/health
+
+### Actuator health
+GET {{baseUrl}}/actuator/health
+
+### Register user
+POST {{baseUrl}}/api/auth/register
+Content-Type: {{json}}
+
+{
+  "name": "Ana Lopez",
+  "email": "ana.lopez@example.com",
+  "password": "supersecret"
+}
+
+### Login user
+POST {{baseUrl}}/api/auth/login
+Content-Type: {{json}}
+
+{
+  "email": "ana.lopez@example.com",
+  "password": "supersecret"
+}
+
+### Create space as ADMIN
+POST {{baseUrl}}/api/spaces
+Content-Type: {{json}}
+Authorization: Bearer {{adminToken}}
+
+{
+  "name": "Sala Ejecutiva",
+  "type": "MEETING_ROOM",
+  "capacity": 10,
+  "location": "Nivel 5",
+  "hourlyRate": 120.00
+}
+
+### List spaces
+GET {{baseUrl}}/api/spaces
+Authorization: Bearer {{userToken}}
+
+### Create reservation
+POST {{baseUrl}}/api/reservations
+Content-Type: {{json}}
+Authorization: Bearer {{userToken}}
+
+{
+  "spaceId": 1,
+  "startDateTime": "2026-07-10T10:00:00",
+  "endDateTime": "2026-07-10T12:00:00",
+  "paymentMethodId": "card-001"
+}
+
+### Try overlapping reservation
+POST {{baseUrl}}/api/reservations
+Content-Type: {{json}}
+Authorization: Bearer {{userToken}}
+
+{
+  "spaceId": 1,
+  "startDateTime": "2026-07-10T11:00:00",
+  "endDateTime": "2026-07-10T13:00:00",
+  "paymentMethodId": "card-002"
+}
+
+### My reservations
+GET {{baseUrl}}/api/reservations/my
+Authorization: Bearer {{userToken}}
+
+### Cancel reservation
+PATCH {{baseUrl}}/api/reservations/1/cancel
+Authorization: Bearer {{userToken}}
+
+### Admin reservation summary
+GET {{baseUrl}}/api/reports/reservations
+Authorization: Bearer {{adminToken}}
+
+### Admin occupancy report
+GET {{baseUrl}}/api/reports/occupancy?from=2026-07-01&to=2026-07-31
+Authorization: Bearer {{adminToken}}
+
+### Mock payment validation
+POST {{baseUrl}}/mock/payments/validate
+Content-Type: {{json}}
+
+{
+  "paymentMethodId": "card-001",
+  "amount": 240.00,
+  "reservationId": 1
+}

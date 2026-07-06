@@ -1,6 +1,6 @@
-package com.pruebaTecnica.BancoCuscatlan.domain.entity;
+package com.pruebatecnica.bancocuscatlan.domain.entity;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.ReservationStatus;
+import com.pruebatecnica.bancocuscatlan.domain.enums.ReservationStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

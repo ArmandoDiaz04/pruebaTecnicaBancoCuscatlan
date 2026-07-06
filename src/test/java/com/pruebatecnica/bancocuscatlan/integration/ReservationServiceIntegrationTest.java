@@ -1,31 +1,32 @@
-package com.pruebaTecnica.BancoCuscatlan.integration;
+package com.pruebatecnica.bancocuscatlan.integration;
 
-import com.pruebaTecnica.BancoCuscatlan.TestcontainersConfiguration;
-import com.pruebaTecnica.BancoCuscatlan.domain.entity.Space;
-import com.pruebaTecnica.BancoCuscatlan.domain.entity.User;
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.ReservationStatus;
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.Role;
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.SpaceType;
-import com.pruebaTecnica.BancoCuscatlan.dto.CreateReservationRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.PaymentValidationResponse;
-import com.pruebaTecnica.BancoCuscatlan.dto.ReservationResponse;
-import com.pruebaTecnica.BancoCuscatlan.exception.OverlappingReservationException;
-import com.pruebaTecnica.BancoCuscatlan.repository.ReservationRepository;
-import com.pruebaTecnica.BancoCuscatlan.repository.SpaceRepository;
-import com.pruebaTecnica.BancoCuscatlan.repository.UserRepository;
-import com.pruebaTecnica.BancoCuscatlan.security.AuthenticatedUserPrincipal;
-import com.pruebaTecnica.BancoCuscatlan.service.PaymentValidationService;
-import com.pruebaTecnica.BancoCuscatlan.service.ReservationService;
+import com.pruebatecnica.bancocuscatlan.TestcontainersConfiguration;
+import com.pruebatecnica.bancocuscatlan.domain.entity.Space;
+import com.pruebatecnica.bancocuscatlan.domain.entity.User;
+import com.pruebatecnica.bancocuscatlan.domain.enums.ReservationStatus;
+import com.pruebatecnica.bancocuscatlan.domain.enums.Role;
+import com.pruebatecnica.bancocuscatlan.domain.enums.SpaceType;
+import com.pruebatecnica.bancocuscatlan.dto.CreateReservationRequest;
+import com.pruebatecnica.bancocuscatlan.dto.PaymentValidationResponse;
+import com.pruebatecnica.bancocuscatlan.dto.ReservationResponse;
+import com.pruebatecnica.bancocuscatlan.exception.OverlappingReservationException;
+import com.pruebatecnica.bancocuscatlan.repository.ReservationRepository;
+import com.pruebatecnica.bancocuscatlan.repository.SpaceRepository;
+import com.pruebatecnica.bancocuscatlan.repository.UserRepository;
+import com.pruebatecnica.bancocuscatlan.security.AuthenticatedUserPrincipal;
+import com.pruebatecnica.bancocuscatlan.service.PaymentValidationService;
+import com.pruebatecnica.bancocuscatlan.service.ReservationService;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.math.BigDecimal;
+import java.time.Month;
 import java.time.LocalDateTime;
 import java.util.concurrent.CompletableFuture;
 
@@ -52,7 +53,7 @@ class ReservationServiceIntegrationTest {
     @Autowired
     private ReservationRepository reservationRepository;
 
-    @MockBean
+        @MockitoBean
     private PaymentValidationService paymentValidationService;
 
     @AfterEach
@@ -90,8 +91,8 @@ class ReservationServiceIntegrationTest {
         CreateReservationRequest firstRequest = new CreateReservationRequest(
                 null,
                 space.getId(),
-                LocalDateTime.of(2026, 7, 6, 10, 0),
-                LocalDateTime.of(2026, 7, 6, 12, 0),
+                LocalDateTime.of(2026, Month.JULY, 6, 10, 0),
+                LocalDateTime.of(2026, Month.JULY, 6, 12, 0),
                 null,
                 "card-001"
         );
@@ -105,8 +106,8 @@ class ReservationServiceIntegrationTest {
         CreateReservationRequest overlapRequest = new CreateReservationRequest(
                 null,
                 space.getId(),
-                LocalDateTime.of(2026, 7, 6, 11, 0),
-                LocalDateTime.of(2026, 7, 6, 13, 0),
+                LocalDateTime.of(2026, Month.JULY, 6, 11, 0),
+                LocalDateTime.of(2026, Month.JULY, 6, 13, 0),
                 null,
                 "card-002"
         );

@@ -1,4 +1,4 @@
-package com.pruebaTecnica.BancoCuscatlan.security;
+package com.pruebatecnica.bancocuscatlan.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;

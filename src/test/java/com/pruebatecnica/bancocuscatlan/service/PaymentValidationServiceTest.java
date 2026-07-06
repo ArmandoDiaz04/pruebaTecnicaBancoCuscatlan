@@ -1,9 +1,9 @@
-package com.pruebaTecnica.BancoCuscatlan.service;
+package com.pruebatecnica.bancocuscatlan.service;
 
-import com.pruebaTecnica.BancoCuscatlan.TestcontainersConfiguration;
-import com.pruebaTecnica.BancoCuscatlan.client.PaymentValidationClient;
-import com.pruebaTecnica.BancoCuscatlan.dto.PaymentValidationRequest;
-import com.pruebaTecnica.BancoCuscatlan.dto.PaymentValidationResponse;
+import com.pruebatecnica.bancocuscatlan.TestcontainersConfiguration;
+import com.pruebatecnica.bancocuscatlan.client.PaymentValidationClient;
+import com.pruebatecnica.bancocuscatlan.dto.PaymentValidationRequest;
+import com.pruebatecnica.bancocuscatlan.dto.PaymentValidationResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

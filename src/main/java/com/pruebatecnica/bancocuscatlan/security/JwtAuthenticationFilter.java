@@ -1,4 +1,4 @@
-package com.pruebaTecnica.BancoCuscatlan.security;
+package com.pruebatecnica.bancocuscatlan.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

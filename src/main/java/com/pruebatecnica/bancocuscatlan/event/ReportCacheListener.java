@@ -1,4 +1,4 @@
-package com.pruebaTecnica.BancoCuscatlan.event;
+package com.pruebatecnica.bancocuscatlan.event;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.event.EventListener;

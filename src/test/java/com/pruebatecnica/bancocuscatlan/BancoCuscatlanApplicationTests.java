@@ -1,4 +1,4 @@
-package com.pruebaTecnica.BancoCuscatlan;
+package com.pruebatecnica.bancocuscatlan;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

@@ -1,6 +1,6 @@
-package com.pruebaTecnica.BancoCuscatlan.domain.entity;
+package com.pruebatecnica.bancocuscatlan.domain.entity;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.enums.Role;
+import com.pruebatecnica.bancocuscatlan.domain.enums.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

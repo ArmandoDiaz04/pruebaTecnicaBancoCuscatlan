@@ -19,7 +19,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
-        format_sql: false
+        "[format_sql]": false
 
   # ===============================
   # CACHE
@@ -34,8 +34,8 @@ spring:
 logging:
   level:
     root: WARN
-    com.pruebaTecnica.BancoCuscatlan: INFO
-    org.hibernate.SQL: WARN
+    "[com.pruebatecnica.bancocuscatlan]": INFO
+    "[org.hibernate.SQL]": WARN
 
 # ===============================
 # APP CUSTOM PROPERTIES

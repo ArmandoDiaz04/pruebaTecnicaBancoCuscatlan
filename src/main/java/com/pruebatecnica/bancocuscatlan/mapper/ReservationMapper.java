@@ -1,7 +1,7 @@
-package com.pruebaTecnica.BancoCuscatlan.mapper;
+package com.pruebatecnica.bancocuscatlan.mapper;
 
-import com.pruebaTecnica.BancoCuscatlan.domain.entity.Reservation;
-import com.pruebaTecnica.BancoCuscatlan.dto.ReservationResponse;
+import com.pruebatecnica.bancocuscatlan.domain.entity.Reservation;
+import com.pruebatecnica.bancocuscatlan.dto.ReservationResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

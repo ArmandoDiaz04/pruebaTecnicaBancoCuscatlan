@@ -1,4 +1,4 @@
-package com.pruebaTecnica.BancoCuscatlan.exception;
+package com.pruebatecnica.bancocuscatlan.exception;
 
 public class UnauthorizedReservationAccessException extends ForbiddenException {
 
