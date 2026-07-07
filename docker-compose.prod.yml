@@ -1,0 +1,20 @@
+services:
+  postgres:
+    environment:
+      POSTGRES_DB: coworking
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me}
+    ports: !reset []
+
+  app:
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://postgres:5432/coworking
+      DB_USER: postgres
+      DB_PASS: ${POSTGRES_PASSWORD:-change-me}
+      JWT_SECRET: ${JWT_SECRET:-change-me}
+      JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
+      CACHE_TTL: ${CACHE_TTL:-3600}
+      PAYMENT_BASE_URL: ${PAYMENT_BASE_URL:-http://localhost:8080}
+      PAYMENT_VALIDATE_PATH: ${PAYMENT_VALIDATE_PATH:-/mock/payments/validate}
+    ports: !reset []

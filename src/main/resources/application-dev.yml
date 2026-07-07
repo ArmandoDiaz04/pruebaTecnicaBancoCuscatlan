@@ -3,9 +3,9 @@ spring:
   # DATABASE — LOCAL
   # ===============================
   datasource:
-    url: jdbc:postgresql://localhost:5432/banco_cuscatlan
+    url: jdbc:postgresql://localhost:5432/coworking
     username: postgres
-    password: postgres
+    password: 12345
     driver-class-name: org.postgresql.Driver
 
   # ===============================
@@ -13,7 +13,7 @@ spring:
   # ===============================
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     open-in-view: false
     properties:
@@ -35,6 +35,7 @@ logging:
   level:
     "[org.hibernate.SQL]": DEBUG
     "[org.hibernate.type.descriptor.sql.BasicBinder]": TRACE
+    "[org.flywaydb]": INFO
 
 # ===============================
 # APP CUSTOM PROPERTIES

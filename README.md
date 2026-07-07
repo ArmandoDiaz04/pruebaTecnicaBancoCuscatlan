@@ -79,17 +79,38 @@ src/main/java/com/pruebatecnica/bancocuscatlan/
 Crear base de datos PostgreSQL local (perfil `dev`):
 
 ```sql
-CREATE DATABASE banco_cuscatlan;
+CREATE DATABASE coworking;
 ```
 
 La configuración `dev` espera:
 - **Host:** localhost
 - **Puerto:** 5432
-- **Database:** banco_cuscatlan
+- **Database:** coworking
 - **Usuario:** postgres
-- **Password:** postgres
+- **Password:** 12345
 
 Puedes modificar estos valores en `src/main/resources/application-dev.yml`.
+
+### Conexión Docker vs conexión local
+
+Si levantas la app con `docker compose up --build`, la base de datos del contenedor usa:
+
+- **Host:** localhost
+- **Puerto:** 5433
+- **Database:** coworking
+- **Usuario:** postgres
+- **Password:** 12345
+
+Esa conexión es independiente de la que tengas en DBeaver para tu PostgreSQL local. Si tu conexión actual usa otra contraseña, no vas a ver la base `coworking` del contenedor porque estás apuntando a otra instancia.
+
+Si en DBeaver ves `coworking` pero no aparecen tablas, revisa que la conexión esté apuntando al mismo host/puerto que la app:
+
+- Para el contenedor con el compose de desarrollo: `localhost:5433`
+- Para `docker-compose.prod.yml` no hay puerto publicado al host, así que DBeaver no puede verlo desde Windows salvo que agregues un mapeo temporal
+
+En la conexión de DBeaver verifica también que el esquema `public` esté expandido y que no tengas filtros de objetos activos.
+
+En DBeaver, crea una conexión nueva o edita una existente para el contenedor con los datos anteriores y luego refresca el árbol de bases.
 
 ### Variables de entorno (perfil `prod`)
 
@@ -178,12 +199,23 @@ La aplicación estará disponible en: **http://localhost:8080**
 
 ## 🐳 Docker
 
-El proyecto incluye un `Dockerfile` multi-stage y `docker-compose.yml` para levantar la API junto con PostgreSQL.
+El proyecto incluye un `Dockerfile` multi-stage y dos archivos de compose:
+
+- `docker-compose.yml` para desarrollo local.
+- `docker-compose.prod.yml` para un despliegue más cercano a producción.
 
 ### Levantar todo con Docker Compose
 
 ```bash
 docker compose up --build
+```
+
+Ese comando usa por defecto `docker-compose.yml`, que es el entorno `dev`.
+
+### Levantar el entorno prod
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build
 ```
 
 La API queda disponible en:
@@ -194,7 +226,9 @@ La base de datos queda disponible en:
 
 - `localhost:5432`
 
-El compose configura el perfil `prod` y pasa las variables necesarias para DB, JWT, cache y pago simulado.
+El compose de desarrollo deja la contraseña `12345` para facilitar las pruebas locales. El compose de producción toma secretos y contraseñas desde variables de entorno.
+
+En producción no se publican puertos al host; el despliegue está pensado para una red interna o un proxy reverso.
 
 ## 🧾 Requests HTTP
 
@@ -208,6 +242,19 @@ Se incluye el archivo [requests.http](requests.http) con ejemplos listos para us
 - validación mock de pago
 
 El archivo usa variables `@baseUrl`, `@userToken` y `@adminToken` para que puedas pegar el JWT real de cada rol.
+
+## 🗃️ Migraciones con Flyway
+
+Flyway se encarga de versionar el esquema de la base de datos y ejecuta automáticamente las migraciones ubicadas en `src/main/resources/db/migration` al arrancar la aplicación o al correr los tests.
+
+Puntos importantes:
+
+- La base de datos como tal debe existir antes de que Flyway conecte; eso se resuelve con Docker Compose, Testcontainers o un script de bootstrap externo.
+- La primera migración del proyecto es la creación del esquema/tablas: `V1__create_coworking_schema.sql`.
+- Flyway guarda cada ejecución en la tabla `flyway_schema_history`, que es normal y esperada; esa tabla evita re-ejecutar scripts ya aplicados y permite saber qué versión se ejecutó.
+- Si agregas cambios de base de datos, crea una nueva migración numerada, por ejemplo `V2__add_indexes.sql`.
+
+Si necesitas crear la base manualmente en local, usa el script raíz [`database-schema.sql`](database-schema.sql) como referencia o ejecuta `CREATE DATABASE coworking;` antes de levantar la app.
 
 ## 🌐 Endpoints
 

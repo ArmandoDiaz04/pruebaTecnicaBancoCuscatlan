@@ -7,9 +7,8 @@ import com.pruebatecnica.bancocuscatlan.dto.PaymentValidationResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,7 +21,7 @@ import static org.mockito.Mockito.when;
 @Import(TestcontainersConfiguration.class)
 class PaymentValidationServiceTest {
 
-    @MockBean
+    @MockitoBean
     private PaymentValidationClient paymentValidationClient;
 
     @Autowired

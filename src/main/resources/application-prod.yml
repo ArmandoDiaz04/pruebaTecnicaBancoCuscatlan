@@ -36,6 +36,7 @@ logging:
     root: WARN
     "[com.pruebatecnica.bancocuscatlan]": INFO
     "[org.hibernate.SQL]": WARN
+    "[org.flywaydb]": INFO
 
 # ===============================
 # APP CUSTOM PROPERTIES
