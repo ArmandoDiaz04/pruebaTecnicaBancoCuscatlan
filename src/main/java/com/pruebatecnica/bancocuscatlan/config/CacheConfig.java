@@ -1,11 +1,24 @@
 package com.pruebatecnica.bancocuscatlan.config;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.time.Duration;
 
 @Configuration
 @EnableCaching
 public class CacheConfig {
+
+    /**
+     * Único punto de verdad del nombre de caché, consumido por ReportService
+     * (@Cacheable) y ReportCacheListener (@CacheEvict) para evitar el drift
+     * entre configuración y literales.
+     */
+    public static final String OCCUPANCY_REPORT_CACHE = "occupancyReport";
 
     private final AppProperties appProperties;
 
@@ -13,18 +26,12 @@ public class CacheConfig {
         this.appProperties = appProperties;
     }
 
-    /**
-     * El nombre del caché y el TTL se leen desde AppProperties (prefijo "app.cache"),
-     * evitando el uso de @Value dispersos.
-     * Para habilitar TTL real con caché en memoria se puede migrar a Caffeine:
-     *   spring.cache.type=caffeine
-     *   spring.cache.caffeine.spec=expireAfterWrite=<ttl>s
-     */
-    public String getCacheName() {
-        return appProperties.getCache().getCacheName();
-    }
-
-    public long getCacheTtl() {
-        return appProperties.getCache().getTtl();
+    @Bean
+    public CacheManager cacheManager() {
+        CaffeineCacheManager cacheManager = new CaffeineCacheManager(OCCUPANCY_REPORT_CACHE);
+        cacheManager.setCaffeine(Caffeine.newBuilder()
+                .expireAfterWrite(Duration.ofSeconds(appProperties.getCache().getTtl()))
+                .maximumSize(500));
+        return cacheManager;
     }
 }

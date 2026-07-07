@@ -1,0 +1,288 @@
+{
+  "info": {
+    "name": "BancoCuscatlan - Coworking",
+    "description": "Colección de ejemplos de uso de la API de reservas de coworking. Equivalente a requests.http, organizada por recurso.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/health", "host": ["{{baseUrl}}"], "path": ["api", "health"] }
+          }
+        },
+        {
+          "name": "Actuator health",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/actuator/health", "host": ["{{baseUrl}}"], "path": ["actuator", "health"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Ana Lopez\",\n  \"email\": \"ana.lopez@example.com\",\n  \"password\": \"supersecret\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] }
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"ana.lopez@example.com\",\n  \"password\": \"supersecret\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Spaces",
+      "item": [
+        {
+          "name": "Create space (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sala Ejecutiva\",\n  \"type\": \"MEETING_ROOM\",\n  \"capacity\": 10,\n  \"location\": \"Nivel 5\",\n  \"hourlyRate\": 120.00\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/spaces", "host": ["{{baseUrl}}"], "path": ["api", "spaces"] }
+          }
+        },
+        {
+          "name": "List spaces",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/spaces", "host": ["{{baseUrl}}"], "path": ["api", "spaces"] }
+          }
+        },
+        {
+          "name": "Get space by id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/spaces/1", "host": ["{{baseUrl}}"], "path": ["api", "spaces", "1"] }
+          }
+        },
+        {
+          "name": "List inactive spaces (ADMIN)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/spaces/inactive", "host": ["{{baseUrl}}"], "path": ["api", "spaces", "inactive"] }
+          }
+        },
+        {
+          "name": "Update space (ADMIN)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sala Ejecutiva Renovada\",\n  \"type\": \"MEETING_ROOM\",\n  \"capacity\": 12,\n  \"location\": \"Nivel 5\",\n  \"hourlyRate\": 135.00\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/spaces/1", "host": ["{{baseUrl}}"], "path": ["api", "spaces", "1"] }
+          }
+        },
+        {
+          "name": "Delete (deactivate) space (ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/spaces/1", "host": ["{{baseUrl}}"], "path": ["api", "spaces", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reservations",
+      "item": [
+        {
+          "name": "Create reservation",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"spaceId\": 1,\n  \"startDateTime\": \"2026-07-10T10:00:00\",\n  \"endDateTime\": \"2026-07-10T12:00:00\",\n  \"paymentMethodId\": \"card-001\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/reservations", "host": ["{{baseUrl}}"], "path": ["api", "reservations"] }
+          }
+        },
+        {
+          "name": "Create overlapping reservation (demo 409)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{userToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"spaceId\": 1,\n  \"startDateTime\": \"2026-07-10T11:00:00\",\n  \"endDateTime\": \"2026-07-10T13:00:00\",\n  \"paymentMethodId\": \"card-002\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/reservations", "host": ["{{baseUrl}}"], "path": ["api", "reservations"] }
+          }
+        },
+        {
+          "name": "My reservations",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/reservations/my", "host": ["{{baseUrl}}"], "path": ["api", "reservations", "my"] }
+          }
+        },
+        {
+          "name": "Get reservation by id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/reservations/1", "host": ["{{baseUrl}}"], "path": ["api", "reservations", "1"] }
+          }
+        },
+        {
+          "name": "Cancel reservation",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{userToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/reservations/1/cancel", "host": ["{{baseUrl}}"], "path": ["api", "reservations", "1", "cancel"] }
+          }
+        },
+        {
+          "name": "List all reservations (ADMIN)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/reservations", "host": ["{{baseUrl}}"], "path": ["api", "reservations"] }
+          }
+        },
+        {
+          "name": "Update reservation status (ADMIN)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{adminToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"CONFIRMED\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/reservations/1/status", "host": ["{{baseUrl}}"], "path": ["api", "reservations", "1", "status"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "List all reservations",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/admin/reservations", "host": ["{{baseUrl}}"], "path": ["api", "admin", "reservations"] }
+          }
+        },
+        {
+          "name": "Cancel any reservation",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/admin/reservations/1/cancel", "host": ["{{baseUrl}}"], "path": ["api", "admin", "reservations", "1", "cancel"] }
+          }
+        },
+        {
+          "name": "Update reservation status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/reservations/1/status?status=CONFIRMED",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "reservations", "1", "status"],
+              "query": [{ "key": "status", "value": "CONFIRMED" }]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Reservation summary (ADMIN)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": { "raw": "{{baseUrl}}/api/reports/reservations", "host": ["{{baseUrl}}"], "path": ["api", "reports", "reservations"] }
+          }
+        },
+        {
+          "name": "Occupancy report (ADMIN)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{adminToken}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/api/reports/occupancy?from=2026-07-01&to=2026-07-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "reports", "occupancy"],
+              "query": [
+                { "key": "from", "value": "2026-07-01" },
+                { "key": "to", "value": "2026-07-31" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mock Payment",
+      "item": [
+        {
+          "name": "Validate payment (mock)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentMethodId\": \"card-001\",\n  \"amount\": 240.00,\n  \"reservationId\": 1\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/mock/payments/validate", "host": ["{{baseUrl}}"], "path": ["mock", "payments", "validate"] }
+          }
+        }
+      ]
+    }
+  ]
+}

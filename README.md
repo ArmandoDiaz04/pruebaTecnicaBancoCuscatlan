@@ -1,6 +1,6 @@
-# 🏦 Banco Cuscatlán API
+# 🏢 Banco Cuscatlán — Sistema de Reservas de Coworking
 
-API REST para el sistema bancario de Banco Cuscatlán construida con Spring Boot 3 y Java 21.
+API REST para un sistema de reservas de espacios de coworking (salas de reuniones, puestos de trabajo, oficinas privadas) construida con Spring Boot 3.5 y Java 21, con validación de pago externa vía circuit breaker, reportes de ocupación cacheados y notificaciones asíncronas.
 
 ## 📋 Tabla de Contenidos
 - [Tecnologías](#tecnologías)
@@ -135,7 +135,7 @@ Este proyecto utiliza `@ConfigurationProperties` en lugar de `@Value` dispersos 
 // Disperso en múltiples clases — difícil de mantener
 @Value("${app.jwt.secret}")  private String secret;
 @Value("${app.jwt.expiration}") private long expiration;
-@Value("${app.cache.cache-name}") private String cacheName;
+@Value("${app.cache.ttl}") private long cacheTtl;
 ```
 
 - Las claves de propiedades están **dispersas** por todo el código.
@@ -243,6 +243,8 @@ Se incluye el archivo [requests.http](requests.http) con ejemplos listos para us
 
 El archivo usa variables `@baseUrl`, `@userToken` y `@adminToken` para que puedas pegar el JWT real de cada rol.
 
+También se incluye una colección equivalente de Postman en [`postman/BancoCuscatlan.postman_collection.json`](postman/BancoCuscatlan.postman_collection.json) junto con su environment ([`postman/BancoCuscatlan.postman_environment.json`](postman/BancoCuscatlan.postman_environment.json)), organizada en carpetas por recurso (Auth, Spaces, Reservations, Admin, Reports, Mock Payment) con las mismas variables `baseUrl`, `userToken` y `adminToken`.
+
 ## 🗃️ Migraciones con Flyway
 
 Flyway se encarga de versionar el esquema de la base de datos y ejecuta automáticamente las migraciones ubicadas en `src/main/resources/db/migration` al arrancar la aplicación o al correr los tests.
@@ -250,9 +252,23 @@ Flyway se encarga de versionar el esquema de la base de datos y ejecuta automát
 Puntos importantes:
 
 - La base de datos como tal debe existir antes de que Flyway conecte; eso se resuelve con Docker Compose, Testcontainers o un script de bootstrap externo.
-- La primera migración del proyecto es la creación del esquema/tablas: `V1__create_coworking_schema.sql`.
+- `V1__create_coworking_schema.sql`: creación del esquema/tablas (`users`, `spaces`, `reservations`) con sus constraints e índices base.
+- `V2__add_positive_numeric_constraints.sql`: `CHECK` de valores positivos (`capacity`, `hourly_rate`, `total_amount`), como defensa adicional a la validación de Bean Validation en los DTOs.
+- `V3__add_reservation_no_overlap_exclusion.sql`: `EXCLUDE` constraint (`btree_gist` + `tsrange`) que impide reservas solapadas a nivel de base de datos, cerrando la condición de carrera del chequeo aplicativo (ver [Concurrencia y transacciones](#concurrencia-y-transacciones-en-reservas)).
+- `V4__seed_admin_user.sql`: inserta un usuario `ADMIN` semilla (ver [Usuario ADMIN inicial](#-usuario-admin-inicial) más abajo) para poder arrancar el sistema — el registro público siempre crea `USER`, y crear otro `ADMIN` requiere ya estar autenticado como uno, así que sin este seed no habría forma de gestionar espacios/usuarios desde cero.
 - Flyway guarda cada ejecución en la tabla `flyway_schema_history`, que es normal y esperada; esa tabla evita re-ejecutar scripts ya aplicados y permite saber qué versión se ejecutó.
-- Si agregas cambios de base de datos, crea una nueva migración numerada, por ejemplo `V2__add_indexes.sql`.
+- Si agregas cambios de base de datos, crea una nueva migración numerada, por ejemplo `V5__add_indexes.sql`.
+
+### 👤 Usuario ADMIN inicial
+
+La migración `V4` crea un usuario ADMIN listo para usar desde el primer arranque:
+
+| Campo | Valor |
+|-------|-------|
+| Email | `admin@coworking.com` |
+| Password | `Admin123!` |
+
+Úsalo para iniciar sesión (`POST /api/auth/login`) y obtener un token con rol ADMIN, necesario para crear espacios, otros usuarios o consultar reportes. En un entorno real este seed debería reemplazarse (o su password rotarse) fuera de `dev`.
 
 Si necesitas crear la base manualmente en local, usa el script raíz [`database-schema.sql`](database-schema.sql) como referencia o ejecuta `CREATE DATABASE coworking;` antes de levantar la app.
 
@@ -364,6 +380,8 @@ Invalidación (`@CacheEvict`) cuando cambia información crítica:
 
 Motivo de cache: reducir latencia y carga de consultas agregadas sobre reservas históricas, manteniendo consistencia mediante invalidación por evento.
 
+Proveedor: **Caffeine** (`CacheConfig`), con TTL configurable vía `app.cache.ttl`. Se eligió sobre el `ConcurrentMapCacheManager` por defecto de Spring porque este último no soporta expiración por tiempo (TTL), y el nombre de caché se centraliza en `CacheConfig.OCCUPANCY_REPORT_CACHE` para que `@Cacheable`/`@CacheEvict` y la configuración del `CacheManager` nunca queden desincronizados.
+
 ## 🧪 Testing
 
 ### Ejecutar Tests
@@ -428,6 +446,10 @@ El reporte de ocupación se cachea y se invalida por eventos de dominio. Esto ma
 
 La validación de pago está protegida con Circuit Breaker y TimeLimiter. Si el proveedor simulado falla, la reserva no se cae: queda en `PENDING_PAYMENT`.
 
+### Concurrencia y transacciones en reservas
+
+El chequeo de solapamiento (`existsOverlappingReservation`) corre en `READ COMMITTED` dentro de `@Transactional`, lo que por sí solo **no** evita que dos requests concurrentes al mismo espacio y rango horario pasen ambos el chequeo antes de que cualquiera haga `commit`. Para cerrar esa ventana de carrera, la migración `V3__add_reservation_no_overlap_exclusion.sql` agrega un `EXCLUDE` constraint de PostgreSQL (`btree_gist` + `tsrange`) sobre `reservations`, que garantiza a nivel de base de datos — sin importar la capa de aplicación — que no puedan coexistir dos reservas `PENDING_PAYMENT`/`CONFIRMED` solapadas para el mismo espacio. `ReservationService.createReservation` usa `saveAndFlush` para forzar la evaluación del constraint dentro del método y traduce la violación (`DataIntegrityViolationException`) a la misma `OverlappingReservationException` de negocio (409), de modo que el chequeo previo sigue siendo el camino feliz (evita invocar el servicio de pago en el caso obvio) y el constraint es la defensa real contra la condición de carrera. La migración `V2__add_positive_numeric_constraints.sql` complementa esto con `CHECK` de valores positivos (`capacity`, `hourly_rate`, `total_amount`) para que la integridad no dependa solo de Bean Validation en el DTO.
+
 ### Java 21
 
 El proyecto compila y corre sobre Java 21. Esa es la versión correcta para esta base de código y es la que se documenta en este repositorio.
@@ -478,17 +500,25 @@ Authorization: Bearer <jwt>
 - `401 Unauthorized`: token ausente/inválido
 - `403 Forbidden`: autenticado pero sin permisos
 
-## 📝 Próximos Pasos
+## 📝 Estado del proyecto
 
-- [ ] Implementar entidades de dominio (Cliente, Cuenta, Transacción, etc.)
-- [ ] Crear servicios de negocio
-- [ ] Implementar repositories
-- [ ] Agregar mappers con MapStruct
-- [x] Implementar autenticación JWT
-- [ ] Agregar tests unitarios y de integración
-- [ ] Configurar perfiles (dev, test, prod)
-- [ ] Implementar Circuit Breaker con Resilience4j
-- [ ] Agregar métricas y monitoreo
+- [x] Entidades de dominio (User, Space, Reservation)
+- [x] Servicios de negocio y repositories
+- [x] Mappers con MapStruct
+- [x] Autenticación JWT y autorización por rol
+- [x] Tests unitarios y de integración (incl. concurrencia, autorización, circuit breaker)
+- [x] Perfiles (dev, test, prod)
+- [x] Circuit Breaker con Resilience4j
+- [x] Métricas y monitoreo (Actuator + Prometheus)
+- [ ] Notificaciones por email real (el listener asíncrono actual solo simula/loguea el envío)
+
+## 🚧 Fuera de alcance / Trade-offs
+
+- No hay paginación en `GET /api/reservations` ni `GET /api/reservations/user/{id}` (aceptable para el volumen de la prueba).
+- No hay outbox/reintentos para el evento `ReservationConfirmedEvent`; la notificación es best-effort, sin garantía de entrega.
+- La caché de reportes de ocupación es en memoria por instancia (Caffeine); en un despliegue multi-instancia no hay invalidación distribuida (requeriría Redis).
+- El `EXCLUDE` constraint anti-solapamiento (migración V3) asume que no existen reservas solapadas previas al desplegar; en un entorno con datos preexistentes habría que sanearlos antes de aplicar la migración.
+- El patrón GoF aplicado es Observer (eventos de dominio); el ciclo de vida de la reserva se valida con un `switch` en `ReservationService`, no con el patrón State — quedó fuera de alcance dado el límite de tiempo.
 
 ## 🤝 Contribución
 

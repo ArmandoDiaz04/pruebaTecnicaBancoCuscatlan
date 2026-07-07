@@ -19,8 +19,14 @@ public class PaymentValidationService {
         this.paymentValidationClient = paymentValidationClient;
     }
 
+    // El fallback se declara solo en @CircuitBreaker (aspecto más externo, por
+    // el orden por defecto de Resilience4j: CircuitBreaker > TimeLimiter). Si
+    // también se declarara en @TimeLimiter, su fallback interceptaría la
+    // excepción antes de que CircuitBreaker la viera, y el circuito nunca
+    // registraría fallos ni abriría (bug real detectado al agregar el test
+    // que verifica el estado OPEN del circuito).
     @CircuitBreaker(name = "paymentValidation", fallbackMethod = "fallbackValidation")
-    @TimeLimiter(name = "paymentValidation", fallbackMethod = "fallbackValidation")
+    @TimeLimiter(name = "paymentValidation")
     public CompletableFuture<PaymentValidationResponse> validatePayment(PaymentValidationRequest request) {
         return CompletableFuture.supplyAsync(() -> paymentValidationClient.validate(request));
     }

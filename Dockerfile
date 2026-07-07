@@ -12,7 +12,13 @@ RUN mvn -q -DskipTests package
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 
-COPY --from=build /workspace/target/BancoCuscatlan-0.0.1-SNAPSHOT.jar app.jar
+RUN groupadd --system spring \
+    && useradd --system --gid spring --home-dir /app --shell /usr/sbin/nologin spring \
+    && chown -R spring:spring /app
+
+COPY --from=build --chown=spring:spring /workspace/target/BancoCuscatlan-0.0.1-SNAPSHOT.jar app.jar
+
+USER spring:spring
 
 EXPOSE 8080
 

@@ -4,8 +4,6 @@ spring:
       ddl-auto: validate
     show-sql: false
     open-in-view: false
-  cache:
-    type: simple
   flyway:
     enabled: true
     baseline-on-migrate: true
@@ -16,7 +14,6 @@ app:
     secret: test-secret-key-banco-cuscatlan-2026-must-be-at-least-256-bits-long
     expiration: 86400000
   cache:
-    cache-name: default
     ttl: 3600
   payment:
     base-url: http://localhost:8080

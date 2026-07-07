@@ -1,5 +1,6 @@
 package com.pruebatecnica.bancocuscatlan.event;
 
+import com.pruebatecnica.bancocuscatlan.config.CacheConfig;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -8,13 +9,13 @@ import org.springframework.stereotype.Component;
 public class ReportCacheListener {
 
     @EventListener
-    @CacheEvict(value = "occupancyReport", allEntries = true)
+    @CacheEvict(value = CacheConfig.OCCUPANCY_REPORT_CACHE, allEntries = true)
     public void onReservationStatusChanged(ReservationStatusChangedEvent event) {
         // Invalida cache de ocupacion cuando cambian reservas relevantes.
     }
 
     @EventListener
-    @CacheEvict(value = "occupancyReport", allEntries = true)
+    @CacheEvict(value = CacheConfig.OCCUPANCY_REPORT_CACHE, allEntries = true)
     public void onSpaceChanged(SpaceChangedEvent event) {
         // Invalida cache de ocupacion cuando cambia disponibilidad de espacios.
     }

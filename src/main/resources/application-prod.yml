@@ -21,13 +21,6 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         "[format_sql]": false
 
-  # ===============================
-  # CACHE
-  # ===============================
-  cache:
-    type: simple
-    cache-names: default
-
 # ===============================
 # LOGGING (PROD — solo WARN+)
 # ===============================
@@ -46,7 +39,6 @@ app:
     secret: ${JWT_SECRET}
     expiration: ${JWT_EXPIRATION:86400000}
   cache:
-    cache-name: default
     ttl: ${CACHE_TTL:3600}
   payment:
     base-url: ${PAYMENT_BASE_URL:http://localhost:8080}

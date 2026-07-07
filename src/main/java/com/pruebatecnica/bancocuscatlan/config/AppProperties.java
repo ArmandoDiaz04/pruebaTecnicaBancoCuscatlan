@@ -43,10 +43,6 @@ public class AppProperties {
     @Setter
     public static class Cache {
 
-        /** Nombre del caché principal. */
-        @NotBlank
-        private String cacheName = "default";
-
         /** TTL en segundos para las entradas de caché. */
         @Positive
         private long ttl = 3600L;

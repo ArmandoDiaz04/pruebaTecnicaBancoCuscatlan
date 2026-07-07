@@ -21,13 +21,6 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         "[format_sql]": true
 
-  # ===============================
-  # CACHE
-  # ===============================
-  cache:
-    type: simple
-    cache-names: default
-
 # ===============================
 # LOGGING (DEV — más verboso)
 # ===============================
@@ -45,7 +38,6 @@ app:
     secret: dev-secret-key-banco-cuscatlan-2026-must-be-at-least-256-bits-long
     expiration: 86400000   # 24 horas en ms
   cache:
-    cache-name: default
     ttl: 3600              # segundos
   payment:
     base-url: http://localhost:8080
