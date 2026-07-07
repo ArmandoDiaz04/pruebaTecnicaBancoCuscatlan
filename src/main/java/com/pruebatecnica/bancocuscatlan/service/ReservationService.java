@@ -14,6 +14,7 @@ import com.pruebatecnica.bancocuscatlan.exception.ForbiddenException;
 import com.pruebatecnica.bancocuscatlan.exception.OverlappingReservationException;
 import com.pruebatecnica.bancocuscatlan.exception.ResourceNotFoundException;
 import com.pruebatecnica.bancocuscatlan.event.ReservationConfirmedEvent;
+import com.pruebatecnica.bancocuscatlan.event.ReservationRescheduledEvent;
 import com.pruebatecnica.bancocuscatlan.event.ReservationStatusChangedEvent;
 import com.pruebatecnica.bancocuscatlan.mapper.ReservationMapper;
 import com.pruebatecnica.bancocuscatlan.repository.ReservationRepository;
@@ -30,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -203,6 +205,55 @@ public class ReservationService {
     }
 
     @Transactional
+    public ReservationResponse rescheduleReservation(Long reservationId, LocalDateTime newStart, LocalDateTime newEnd) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada con id: " + reservationId));
+
+        AuthenticatedUserPrincipal principal = SecurityUtils.currentUser();
+        if (principal.role() == Role.USER && !reservation.getUser().getId().equals(principal.id())) {
+            throw new com.pruebatecnica.bancocuscatlan.exception.UnauthorizedReservationAccessException(
+                    "No puede modificar reservas de otro usuario");
+        }
+
+        if (!BLOCKING_STATUSES.contains(reservation.getStatus())) {
+            throw new com.pruebatecnica.bancocuscatlan.exception.InvalidReservationStateException(
+                    "No se puede reagendar una reserva en estado " + reservation.getStatus());
+        }
+
+        if (!newStart.isBefore(newEnd)) {
+            throw new BadRequestException("La fecha de inicio debe ser menor que la fecha de fin");
+        }
+
+        boolean overlaps = reservationRepository.existsOverlappingReservationExcludingId(
+                reservation.getSpace().getId(),
+                reservation.getId(),
+                newStart,
+                newEnd,
+                BLOCKING_STATUSES
+        );
+
+        if (overlaps) {
+            throw new OverlappingReservationException("El espacio ya tiene una reserva en el rango de tiempo solicitado");
+        }
+
+        reservation.setStartDateTime(newStart);
+        reservation.setEndDateTime(newEnd);
+        reservation.setTotalAmount(calculateTotalAmount(reservation.getSpace().getHourlyRate(), newStart, newEnd));
+
+        Reservation updated;
+        try {
+            updated = reservationRepository.saveAndFlush(reservation);
+        } catch (DataIntegrityViolationException ex) {
+            throw new OverlappingReservationException("El espacio ya tiene una reserva en el rango de tiempo solicitado");
+        } catch (CannotAcquireLockException ex) {
+            throw new OverlappingReservationException("El espacio ya tiene una reserva en el rango de tiempo solicitado");
+        }
+
+        eventPublisher.publishEvent(new ReservationRescheduledEvent(updated.getId()));
+        return reservationMapper.toResponse(updated);
+    }
+
+    @Transactional
     public ReservationResponse updateReservationStatus(Long reservationId, ReservationStatus status) {
         if (SecurityUtils.currentUser().role() != Role.ADMIN) {
             throw new ForbiddenException("Solo ADMIN puede actualizar el estado de una reserva");
@@ -269,7 +320,7 @@ public class ReservationService {
         ));
     }
 
-    private BigDecimal calculateTotalAmount(BigDecimal hourlyRate, java.time.LocalDateTime start, java.time.LocalDateTime end) {
+    private BigDecimal calculateTotalAmount(BigDecimal hourlyRate, LocalDateTime start, LocalDateTime end) {
         long totalMinutes = Duration.between(start, end).toMinutes();
         BigDecimal hours = BigDecimal.valueOf(totalMinutes)
                 .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);

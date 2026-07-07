@@ -10,8 +10,11 @@ import com.pruebatecnica.bancocuscatlan.dto.CreateReservationRequest;
 import com.pruebatecnica.bancocuscatlan.dto.PaymentValidationResponse;
 import com.pruebatecnica.bancocuscatlan.dto.ReservationResponse;
 import com.pruebatecnica.bancocuscatlan.event.ReservationConfirmedEvent;
+import com.pruebatecnica.bancocuscatlan.event.ReservationRescheduledEvent;
 import com.pruebatecnica.bancocuscatlan.event.ReservationStatusChangedEvent;
+import com.pruebatecnica.bancocuscatlan.exception.InvalidReservationStateException;
 import com.pruebatecnica.bancocuscatlan.exception.OverlappingReservationException;
+import com.pruebatecnica.bancocuscatlan.exception.UnauthorizedReservationAccessException;
 import com.pruebatecnica.bancocuscatlan.mapper.ReservationMapper;
 import com.pruebatecnica.bancocuscatlan.repository.ReservationRepository;
 import com.pruebatecnica.bancocuscatlan.repository.SpaceRepository;
@@ -211,6 +214,123 @@ class ReservationServiceTest {
 
         assertThat(response.getStatus()).isEqualTo(ReservationStatus.CANCELLED);
         verify(eventPublisher).publishEvent(any(ReservationStatusChangedEvent.class));
+    }
+
+    @Test
+    void rescheduleReservation_updatesDatesAndAmount_whenNoOverlap() {
+        authenticate(1L, Role.USER);
+
+        User user = User.builder().id(1L).name("Ana Perez").email("ana@example.com")
+                .password("encoded-password").role(Role.USER).build();
+        Space space = Space.builder().id(2L).name("Sala 1").type(SpaceType.MEETING_ROOM)
+                .capacity(8).location("Nivel 3").hourlyRate(new BigDecimal("100.00")).active(true).build();
+        Reservation reservation = Reservation.builder()
+                .id(11L)
+                .user(user)
+                .space(space)
+                .startDateTime(LocalDateTime.of(2026, 7, 6, 10, 0))
+                .endDateTime(LocalDateTime.of(2026, 7, 6, 12, 0))
+                .status(ReservationStatus.CONFIRMED)
+                .totalAmount(new BigDecimal("200.00"))
+                .paymentReference("tx-123")
+                .build();
+
+        LocalDateTime newStart = LocalDateTime.of(2026, 7, 6, 14, 0);
+        LocalDateTime newEnd = LocalDateTime.of(2026, 7, 6, 17, 0);
+
+        when(reservationRepository.findById(11L)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.existsOverlappingReservationExcludingId(eq(2L), eq(11L), eq(newStart), eq(newEnd), any()))
+                .thenReturn(false);
+        when(reservationRepository.saveAndFlush(any(Reservation.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(reservationMapper.toResponse(any(Reservation.class))).thenAnswer(invocation -> toResponse(invocation.getArgument(0)));
+
+        ReservationResponse response = reservationService.rescheduleReservation(11L, newStart, newEnd);
+
+        assertThat(response.getStartDateTime()).isEqualTo(newStart);
+        assertThat(response.getEndDateTime()).isEqualTo(newEnd);
+        assertThat(response.getTotalAmount()).isEqualByComparingTo(new BigDecimal("300.00"));
+        verify(eventPublisher).publishEvent(any(ReservationRescheduledEvent.class));
+    }
+
+    @Test
+    void rescheduleReservation_rejectsOverlappingDates() {
+        authenticate(1L, Role.USER);
+
+        User user = User.builder().id(1L).name("Ana Perez").email("ana@example.com")
+                .password("encoded-password").role(Role.USER).build();
+        Space space = Space.builder().id(2L).name("Sala 1").type(SpaceType.MEETING_ROOM)
+                .capacity(8).location("Nivel 3").hourlyRate(new BigDecimal("100.00")).active(true).build();
+        Reservation reservation = Reservation.builder()
+                .id(11L)
+                .user(user)
+                .space(space)
+                .startDateTime(LocalDateTime.of(2026, 7, 6, 10, 0))
+                .endDateTime(LocalDateTime.of(2026, 7, 6, 12, 0))
+                .status(ReservationStatus.CONFIRMED)
+                .totalAmount(new BigDecimal("200.00"))
+                .build();
+
+        when(reservationRepository.findById(11L)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.existsOverlappingReservationExcludingId(eq(2L), eq(11L), any(), any(), any()))
+                .thenReturn(true);
+
+        LocalDateTime newStart = LocalDateTime.of(2026, 7, 6, 14, 0);
+        LocalDateTime newEnd = LocalDateTime.of(2026, 7, 6, 17, 0);
+
+        assertThatThrownBy(() -> reservationService.rescheduleReservation(11L, newStart, newEnd))
+                .isInstanceOf(OverlappingReservationException.class);
+
+        verify(reservationRepository, never()).saveAndFlush(any());
+    }
+
+    @Test
+    void rescheduleReservation_rejectsWhenNotOwner() {
+        authenticate(99L, Role.USER);
+
+        User owner = User.builder().id(1L).name("Ana Perez").email("ana@example.com")
+                .password("encoded-password").role(Role.USER).build();
+        Space space = Space.builder().id(2L).name("Sala 1").type(SpaceType.MEETING_ROOM)
+                .capacity(8).location("Nivel 3").hourlyRate(new BigDecimal("100.00")).active(true).build();
+        Reservation reservation = Reservation.builder()
+                .id(11L)
+                .user(owner)
+                .space(space)
+                .startDateTime(LocalDateTime.of(2026, 7, 6, 10, 0))
+                .endDateTime(LocalDateTime.of(2026, 7, 6, 12, 0))
+                .status(ReservationStatus.CONFIRMED)
+                .totalAmount(new BigDecimal("200.00"))
+                .build();
+
+        when(reservationRepository.findById(11L)).thenReturn(Optional.of(reservation));
+
+        assertThatThrownBy(() -> reservationService.rescheduleReservation(
+                11L, LocalDateTime.of(2026, 7, 6, 14, 0), LocalDateTime.of(2026, 7, 6, 17, 0)))
+                .isInstanceOf(UnauthorizedReservationAccessException.class);
+    }
+
+    @Test
+    void rescheduleReservation_rejectsWhenReservationIsCancelled() {
+        authenticate(1L, Role.USER);
+
+        User user = User.builder().id(1L).name("Ana Perez").email("ana@example.com")
+                .password("encoded-password").role(Role.USER).build();
+        Space space = Space.builder().id(2L).name("Sala 1").type(SpaceType.MEETING_ROOM)
+                .capacity(8).location("Nivel 3").hourlyRate(new BigDecimal("100.00")).active(true).build();
+        Reservation reservation = Reservation.builder()
+                .id(11L)
+                .user(user)
+                .space(space)
+                .startDateTime(LocalDateTime.of(2026, 7, 6, 10, 0))
+                .endDateTime(LocalDateTime.of(2026, 7, 6, 12, 0))
+                .status(ReservationStatus.CANCELLED)
+                .totalAmount(new BigDecimal("200.00"))
+                .build();
+
+        when(reservationRepository.findById(11L)).thenReturn(Optional.of(reservation));
+
+        assertThatThrownBy(() -> reservationService.rescheduleReservation(
+                11L, LocalDateTime.of(2026, 7, 6, 14, 0), LocalDateTime.of(2026, 7, 6, 17, 0)))
+                .isInstanceOf(InvalidReservationStateException.class);
     }
 
     private void authenticate(Long id, Role role) {

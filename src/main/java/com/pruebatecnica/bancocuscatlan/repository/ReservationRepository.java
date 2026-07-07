@@ -27,6 +27,23 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             @Param("statuses") Collection<ReservationStatus> statuses
     );
 
+    @Query("""
+            SELECT CASE WHEN COUNT(r) > 0 THEN true ELSE false END
+            FROM Reservation r
+            WHERE r.space.id = :spaceId
+            AND r.id <> :excludeReservationId
+            AND r.status IN :statuses
+            AND r.startDateTime < :endDateTime
+            AND r.endDateTime > :startDateTime
+            """)
+    boolean existsOverlappingReservationExcludingId(
+            @Param("spaceId") Long spaceId,
+            @Param("excludeReservationId") Long excludeReservationId,
+            @Param("startDateTime") LocalDateTime startDateTime,
+            @Param("endDateTime") LocalDateTime endDateTime,
+            @Param("statuses") Collection<ReservationStatus> statuses
+    );
+
     List<Reservation> findByUserId(Long userId);
 
         long countByStatus(ReservationStatus status);

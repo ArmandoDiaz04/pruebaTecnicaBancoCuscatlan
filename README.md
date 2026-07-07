@@ -236,7 +236,7 @@ Se incluye el archivo [requests.http](requests.http) con ejemplos listos para us
 
 - registro y login
 - creación y listado de espacios
-- creación y cancelación de reservas
+- creación, reagendamiento y cancelación de reservas
 - reporte de reservas y ocupación
 - health y actuator
 - validación mock de pago
@@ -319,6 +319,8 @@ La creación de reservas invoca este servicio. Reglas:
 
 - Si el pago es aprobado, la reserva pasa a `CONFIRMED`.
 - Si el pago falla o el servicio externo no responde, la reserva se crea en `PENDING_PAYMENT`.
+
+Para forzar un rechazo y ver el flujo `PENDING_PAYMENT` (ver request "Create reservation with rejected payment" en `requests.http`/Postman), basta con enviar un `paymentMethodId` que contenga `reject` o `fail` (ej. `"card-reject"`) — el mock (`MockPaymentController`) lo detecta y responde `approved: false`.
 
 ### Circuit Breaker y fallback
 
@@ -493,7 +495,7 @@ Authorization: Bearer <jwt>
 - **USER**
   - Crear reservas
   - Ver solo sus reservas
-  - Cancelar solo sus reservas
+  - Reagendar (`PATCH /api/reservations/{id}/reschedule`) o cancelar solo sus reservas propias, mientras estén en `PENDING_PAYMENT` o `CONFIRMED`
 
 ### Respuestas de seguridad
 
@@ -519,6 +521,7 @@ Authorization: Bearer <jwt>
 - La caché de reportes de ocupación es en memoria por instancia (Caffeine); en un despliegue multi-instancia no hay invalidación distribuida (requeriría Redis).
 - El `EXCLUDE` constraint anti-solapamiento (migración V3) asume que no existen reservas solapadas previas al desplegar; en un entorno con datos preexistentes habría que sanearlos antes de aplicar la migración.
 - El patrón GoF aplicado es Observer (eventos de dominio); el ciclo de vida de la reserva se valida con un `switch` en `ReservationService`, no con el patrón State — quedó fuera de alcance dado el límite de tiempo.
+- Reagendar una reserva (`PATCH /api/reservations/{id}/reschedule`) recalcula `totalAmount` según las nuevas fechas pero **no** vuelve a invocar la validación de pago externa — asume que el método de pago ya validado en la creación sigue siendo válido para el nuevo monto/rango.
 
 ## 🤝 Contribución
 

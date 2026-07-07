@@ -1,6 +1,7 @@
 package com.pruebatecnica.bancocuscatlan.controller;
 
 import com.pruebatecnica.bancocuscatlan.dto.CreateReservationRequest;
+import com.pruebatecnica.bancocuscatlan.dto.RescheduleReservationRequest;
 import com.pruebatecnica.bancocuscatlan.dto.ReservationResponse;
 import com.pruebatecnica.bancocuscatlan.dto.UpdateReservationStatusRequest;
 import com.pruebatecnica.bancocuscatlan.service.ReservationService;
@@ -71,6 +72,21 @@ public class ReservationController {
     @Operation(summary = "Cancelar reserva", description = "USER puede cancelar sus reservas, ADMIN cualquiera")
     public ResponseEntity<ReservationResponse> cancelReservation(@PathVariable Long id) {
         return ResponseEntity.ok(reservationService.cancelReservation(id));
+    }
+
+    @PatchMapping("/{id}/reschedule")
+    @Operation(summary = "Reagendar reserva", description = "USER puede cambiar las fechas de sus propias reservas (PENDING_PAYMENT o CONFIRMED), ADMIN cualquiera. Valida que las nuevas fechas no se solapen con otra reserva del mismo espacio.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Reserva reagendada exitosamente"),
+            @ApiResponse(responseCode = "409", description = "Conflicto por traslape de horario"),
+            @ApiResponse(responseCode = "400", description = "Fechas inválidas o estado no permite reagendar"),
+            @ApiResponse(responseCode = "403", description = "No es dueño de la reserva")
+    })
+    public ResponseEntity<ReservationResponse> rescheduleReservation(
+            @PathVariable Long id,
+            @Valid @RequestBody RescheduleReservationRequest request
+    ) {
+        return ResponseEntity.ok(reservationService.rescheduleReservation(id, request.getStartDateTime(), request.getEndDateTime()));
     }
 
     @PatchMapping("/{id}/status")

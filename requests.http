@@ -55,6 +55,19 @@ Authorization: Bearer {{userToken}}
   "paymentMethodId": "card-001"
 }
 
+### Create reservation with rejected payment (demo PENDING_PAYMENT)
+# El mock de pago rechaza cualquier paymentMethodId que contenga "reject" o "fail".
+POST {{baseUrl}}/api/reservations
+Content-Type: {{json}}
+Authorization: Bearer {{userToken}}
+
+{
+  "spaceId": 1,
+  "startDateTime": "2026-07-12T09:00:00",
+  "endDateTime": "2026-07-12T11:00:00",
+  "paymentMethodId": "card-reject"
+}
+
 ### Try overlapping reservation
 POST {{baseUrl}}/api/reservations
 Content-Type: {{json}}
@@ -70,6 +83,16 @@ Authorization: Bearer {{userToken}}
 ### My reservations
 GET {{baseUrl}}/api/reservations/my
 Authorization: Bearer {{userToken}}
+
+### Reschedule reservation (owner or ADMIN; valida solapamiento)
+PATCH {{baseUrl}}/api/reservations/1/reschedule
+Content-Type: {{json}}
+Authorization: Bearer {{userToken}}
+
+{
+  "startDateTime": "2026-07-10T15:00:00",
+  "endDateTime": "2026-07-10T17:00:00"
+}
 
 ### Cancel reservation
 PATCH {{baseUrl}}/api/reservations/1/cancel

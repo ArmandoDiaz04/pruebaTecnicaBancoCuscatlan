@@ -19,4 +19,10 @@ public class ReportCacheListener {
     public void onSpaceChanged(SpaceChangedEvent event) {
         // Invalida cache de ocupacion cuando cambia disponibilidad de espacios.
     }
+
+    @EventListener
+    @CacheEvict(value = CacheConfig.OCCUPANCY_REPORT_CACHE, allEntries = true)
+    public void onReservationRescheduled(ReservationRescheduledEvent event) {
+        // Invalida cache de ocupacion cuando cambian las fechas de una reserva.
+    }
 }
