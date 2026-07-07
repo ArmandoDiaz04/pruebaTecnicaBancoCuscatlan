@@ -173,54 +173,24 @@ git clone https://github.com/ArmandoDiaz04/pruebaTecnicaBancoCuscatlan.git
 cd pruebaTecnicaBancoCuscatlan
 ```
 
-A partir de aquí, la forma más rápida de levantar todo (app + PostgreSQL) es con Docker Compose — ver sección [🐳 Docker](#-docker).
-
 ## 🏃 Ejecución
 
-### Opción 1: Maven
-
-```bash
-# Compilar el proyecto
-mvn clean compile
-
-# Ejecutar con perfil dev (activo por defecto)
-mvn spring-boot:run
-
-# Ejecutar con perfil específico
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
-mvn spring-boot:run -Dspring-boot.run.profiles=prod
-```
-
-### Opción 2: JAR
-
-```bash
-# Empaquetar
-mvn clean package -DskipTests
-
-# Ejecutar
-java -jar target/BancoCuscatlan-0.0.1-SNAPSHOT.jar
-```
-
-### Opción 3: IDE
-
-Ejecutar la clase `BancoCuscatlanApplication.java` desde tu IDE favorito.
-
-La aplicación estará disponible en: **http://localhost:8080**
-
-## 🐳 Docker
-
-El proyecto incluye un `Dockerfile` multi-stage y dos archivos de compose:
-
-- `docker-compose.yml` para desarrollo local.
-- `docker-compose.prod.yml` para un despliegue más cercano a producción.
-
-### Levantar todo con Docker Compose
+Este proyecto se ejecuta **exclusivamente con Docker Compose** — es la forma recomendada por el enunciado de la prueba y la única verificada de punta a punta (build, migraciones, seed de ADMIN, endpoints, Swagger y Actuator). No requiere tener Java, Maven ni PostgreSQL instalados en tu máquina: todo corre en contenedores.
 
 ```bash
 docker compose up --build
 ```
 
-Ese comando usa por defecto `docker-compose.yml`, que es el entorno `dev`.
+Este comando levanta dos contenedores (`banco-cuscatlan-postgres` y `banco-cuscatlan-app`), aplica las migraciones de Flyway automáticamente y deja la API disponible en **http://localhost:8080**.
+
+Internamente, la app corre con el perfil de Spring `prod` (`application-prod.yml`) incluso en este modo "local", porque dentro de la red de Docker la base de datos se resuelve por el nombre del servicio (`postgres`), no por `localhost` — de ahí que la configuración use variables de entorno (`DB_URL`, `JWT_SECRET`, etc.) en vez del perfil `dev`, pensado para ejecutar la app directamente en el host.
+
+## 🐳 Docker
+
+El proyecto incluye un `Dockerfile` multi-stage y dos archivos de compose:
+
+- `docker-compose.yml`: configuración base, con credenciales de desarrollo fijas y puertos expuestos (Postgres en `5433`, app en `8080`).
+- `docker-compose.prod.yml`: overlay que endurece la configuración base — credenciales vía variables de entorno (sin defaults hardcodeados salvo `change-me` como placeholder), sin publicar puertos al host.
 
 ### Levantar el entorno prod
 
@@ -228,17 +198,9 @@ Ese comando usa por defecto `docker-compose.yml`, que es el entorno `dev`.
 docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build
 ```
 
-La API queda disponible en:
+A diferencia del compose base, `docker-compose.prod.yml` **no publica ningún puerto al host** (`ports: !reset []` en ambos servicios) — ni la API ni la base de datos son alcanzables desde `localhost`. Es intencional: este overlay está pensado para un despliegue detrás de una red interna o un proxy reverso, no para acceder directamente desde la máquina del desarrollador. Para probarlo localmente de todas formas, agrega tu propio mapeo de puertos con un archivo `docker-compose.override.yml` o accede vía `docker exec` a la red del contenedor.
 
-- `http://localhost:8080`
-
-La base de datos queda disponible en:
-
-- `localhost:5432`
-
-El compose de desarrollo deja la contraseña `12345` para facilitar las pruebas locales. El compose de producción toma secretos y contraseñas desde variables de entorno.
-
-En producción no se publican puertos al host; el despliegue está pensado para una red interna o un proxy reverso.
+El compose base (`docker-compose.yml`) deja la contraseña `12345` fija para facilitar las pruebas locales. El overlay de producción exige pasar los secretos (`JWT_SECRET`, `POSTGRES_PASSWORD`, etc.) por variable de entorno — su valor por defecto (`change-me`) es solo un placeholder para que el `docker compose config` no falle por variables no definidas; la app **sí arranca** con ese placeholder, pero cualquier intento de login falla con 500 (`WeakKeyException`: la clave es demasiado corta para HMAC-SHA), así que en un despliegue real `JWT_SECRET` debe definirse explícitamente (mínimo 256 bits).
 
 ## 🧾 Requests HTTP
 
@@ -306,7 +268,10 @@ GET /api/health
 GET /actuator/health
 GET /actuator/info
 GET /actuator/metrics
+GET /actuator/circuitbreakers
 ```
+
+`/actuator/health` es público. El resto de endpoints de Actuator exigen rol `ADMIN` (`Authorization: Bearer <token>`) cuando la app corre con el perfil `prod` — que es el caso por defecto al usar `docker compose up` (ver `SecurityConfig.java`).
 
 ### Documentación Swagger
 
