@@ -1,4 +1,4 @@
-# 🏢 Banco Cuscatlán — Sistema de Reservas de Coworking
+# 🏢 Prueba Técnica Banco Cuscatlán - Sistema de Reservas de Coworking
 
 API REST para un sistema de reservas de espacios de coworking (salas de reuniones, puestos de trabajo, oficinas privadas) construida con Spring Boot 3.5 y Java 21, con validación de pago externa vía circuit breaker, reportes de ocupación cacheados y notificaciones asíncronas.
 
@@ -502,20 +502,9 @@ Authorization: Bearer <jwt>
 - `401 Unauthorized`: token ausente/inválido
 - `403 Forbidden`: autenticado pero sin permisos
 
-## 📝 Estado del proyecto
-
-- [x] Entidades de dominio (User, Space, Reservation)
-- [x] Servicios de negocio y repositories
-- [x] Mappers con MapStruct
-- [x] Autenticación JWT y autorización por rol
-- [x] Tests unitarios y de integración (incl. concurrencia, autorización, circuit breaker)
-- [x] Perfiles (dev, test, prod)
-- [x] Circuit Breaker con Resilience4j
-- [x] Métricas y monitoreo (Actuator + Prometheus)
-- [ ] Notificaciones por email real (el listener asíncrono actual solo simula/loguea el envío)
-
 ## 🚧 Fuera de alcance / Trade-offs
 
+- Notificaciones por email real: el listener asíncrono actual solo simula/loguea el envío de confirmación.
 - No hay paginación en `GET /api/reservations` ni `GET /api/reservations/user/{id}` (aceptable para el volumen de la prueba).
 - No hay outbox/reintentos para el evento `ReservationConfirmedEvent`; la notificación es best-effort, sin garantía de entrega.
 - La caché de reportes de ocupación es en memoria por instancia (Caffeine); en un despliegue multi-instancia no hay invalidación distribuida (requeriría Redis).
@@ -538,4 +527,4 @@ Apache 2.0
 
 ## 📧 Contacto
 
-Equipo de Desarrollo - dev@bancocuscatlan.com
+Armando Díaz - diazarmando783@gmail.com - +503 7783-9074
