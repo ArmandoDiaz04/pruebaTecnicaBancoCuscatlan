@@ -110,7 +110,7 @@ class ReservationServiceTest {
                         .message("approved")
                         .build()
         ));
-        when(reservationRepository.save(any(Reservation.class))).thenAnswer(invocation -> {
+        when(reservationRepository.saveAndFlush(any(Reservation.class))).thenAnswer(invocation -> {
             Reservation reservation = invocation.getArgument(0);
             reservation.setId(10L);
             return reservation;
@@ -120,7 +120,7 @@ class ReservationServiceTest {
         ReservationResponse response = reservationService.createReservation(request);
 
         ArgumentCaptor<Reservation> captor = ArgumentCaptor.forClass(Reservation.class);
-        verify(reservationRepository).save(captor.capture());
+        verify(reservationRepository).saveAndFlush(captor.capture());
         Reservation saved = captor.getValue();
 
         assertThat(saved.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);

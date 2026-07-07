@@ -22,6 +22,8 @@ import com.pruebatecnica.bancocuscatlan.repository.UserRepository;
 import com.pruebatecnica.bancocuscatlan.security.AuthenticatedUserPrincipal;
 import com.pruebatecnica.bancocuscatlan.security.SecurityUtils;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.dao.CannotAcquireLockException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -65,18 +67,7 @@ public class ReservationService {
     public ReservationResponse createReservation(CreateReservationRequest request) {
         AuthenticatedUserPrincipal principal = SecurityUtils.currentUser();
 
-        Long targetUserId = request.getUserId();
-        if (principal.role() == Role.USER) {
-            if (targetUserId == null) {
-                targetUserId = principal.id();
-            }
-            if (!principal.id().equals(targetUserId)) {
-                throw new ForbiddenException("No puede crear reservas para otro usuario");
-            }
-        } else if (targetUserId == null) {
-            targetUserId = principal.id();
-        }
-
+        Long targetUserId = request.getUserId() != null ? request.getUserId() : principal.id();
         if (principal.role() == Role.USER && !principal.id().equals(targetUserId)) {
             throw new ForbiddenException("No puede crear reservas para otro usuario");
         }
@@ -130,7 +121,19 @@ public class ReservationService {
             .totalAmount(totalAmount)
                 .build();
 
-        Reservation created = reservationRepository.save(reservation);
+        Reservation created;
+        try {
+            created = reservationRepository.saveAndFlush(reservation);
+        } catch (DataIntegrityViolationException ex) {
+            // Violación directa del EXCLUDE constraint (V3): la BD detectó el solapamiento.
+            throw new OverlappingReservationException("El espacio ya tiene una reserva en el rango de tiempo solicitado");
+        } catch (CannotAcquireLockException ex) {
+            // Bajo inserciones concurrentes verdaderamente simultáneas, Postgres puede
+            // resolver el chequeo del EXCLUDE constraint como un deadlock (en vez de una
+            // violación directa) y abortar una de las dos transacciones. La causa raíz es
+            // la misma: dos reservas solapadas compitiendo por el mismo rango.
+            throw new OverlappingReservationException("El espacio ya tiene una reserva en el rango de tiempo solicitado");
+        }
         if (created.getStatus() == ReservationStatus.CONFIRMED) {
             publishConfirmedEvent(created);
         }
@@ -201,6 +204,10 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse updateReservationStatus(Long reservationId, ReservationStatus status) {
+        if (SecurityUtils.currentUser().role() != Role.ADMIN) {
+            throw new ForbiddenException("Solo ADMIN puede actualizar el estado de una reserva");
+        }
+
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Reserva no encontrada con id: " + reservationId));
 

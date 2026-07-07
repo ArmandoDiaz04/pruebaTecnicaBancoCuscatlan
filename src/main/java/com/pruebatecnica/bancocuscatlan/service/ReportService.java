@@ -1,5 +1,6 @@
 package com.pruebatecnica.bancocuscatlan.service;
 
+import com.pruebatecnica.bancocuscatlan.config.CacheConfig;
 import com.pruebatecnica.bancocuscatlan.domain.enums.ReservationStatus;
 import com.pruebatecnica.bancocuscatlan.dto.OccupancyReportResponse;
 import com.pruebatecnica.bancocuscatlan.dto.ReservationReportResponse;
@@ -37,7 +38,7 @@ public class ReportService {
                 .build();
     }
 
-    @Cacheable(value = "occupancyReport", key = "#from.toString() + '_' + #to.toString()")
+    @Cacheable(value = CacheConfig.OCCUPANCY_REPORT_CACHE, key = "#from.toString() + '_' + #to.toString()")
     @Transactional(readOnly = true)
     public List<OccupancyReportResponse> getOccupancyReport(LocalDate from, LocalDate to) {
         if (from.isAfter(to)) {

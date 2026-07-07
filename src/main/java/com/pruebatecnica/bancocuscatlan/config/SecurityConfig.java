@@ -58,6 +58,7 @@ public class SecurityConfig {
                 // Endpoints públicos
                 authorize.requestMatchers(
                     "/",
+                    "/error",
                     "/api/auth/register",
                     "/api/auth/login",
                     "/mock/payments/**",
