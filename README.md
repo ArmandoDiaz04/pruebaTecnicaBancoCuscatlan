@@ -7,6 +7,7 @@ API REST para un sistema de reservas de espacios de coworking (salas de reunione
 - [Requisitos](#requisitos)
 - [Estructura del Proyecto](#estructura-del-proyecto)
 - [Configuración](#configuración)
+- [Clonar el repositorio](#-clonar-el-repositorio)
 - [Ejecución](#ejecución)
 - [Docker](#docker)
 - [Requests HTTP](#requests-http)
@@ -164,6 +165,15 @@ public class AppProperties {
 | Refactoring | Riesgoso | Seguro |
 
 La clase `AppProperties` agrupa las secciones `app.jwt.*` y `app.cache.*`, y es registrada en el arranque mediante `@EnableConfigurationProperties(AppProperties.class)`.
+
+## 📥 Clonar el repositorio
+
+```bash
+git clone https://github.com/ArmandoDiaz04/pruebaTecnicaBancoCuscatlan.git
+cd pruebaTecnicaBancoCuscatlan
+```
+
+A partir de aquí, la forma más rápida de levantar todo (app + PostgreSQL) es con Docker Compose — ver sección [🐳 Docker](#-docker).
 
 ## 🏃 Ejecución
 
